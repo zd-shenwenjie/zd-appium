@@ -1,0 +1,20 @@
+{
+    "name": "zd-appimu-server",
+    "version": 1,
+    "servers": [{
+            "name": "appium",
+            "port": 7001,
+            "enabled": true
+        },
+        {
+            "name": "lambda",
+            "port": 7002,
+            "enabled": true
+        },
+        {
+            "name": "frontend",
+            "port": 7003,
+            "enabled": true
+        }
+    ]
+}
