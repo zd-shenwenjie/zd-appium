@@ -5,7 +5,8 @@ const { getDefaultArgs } = require('appium/build/lib/parser');
 const { SEREVER_CONFIG, ANDROID_CAPS } = require('./config');
 const { fs, tempDir } = require('appium-support');
 const { logger } = require('../logger');
-
+const SocketClient = require('socket.io-client');
+const client = new SocketClient('http://localhost:7001');
 
 const LOG_SEND_INTERVAL_MS = 250;
 let appiumServer = null;
@@ -36,21 +37,18 @@ async function connectStartServer(args) {
         batchedLogs.push({ level, msg });
     };
     args.throwInsteadOfExit = true;
-    logWatcher = setInterval(async() => {
+    logWatcher = setInterval(async () => {
         if (batchedLogs.length) {
             try {
-                await fs.writeFile(
-                    logFile,
-                    batchedLogs.map((log) => `[${log.level}] ${log.msg}`).join('\n'), { flag: 'a' }
-                );
-            } catch (ign) {}
+                const log = batchedLogs.map((log) => `[${log.level}] ${log.msg}`).join('\n');
+                await fs.writeFile(logFile, log, { flag: 'a' });
+                client.emit('log', log);
+            } catch (ign) { }
             batchedLogs.splice(0, batchedLogs.length);
         }
     }, LOG_SEND_INTERVAL_MS);
     appiumServer = await appium.main(args);
 }
-
-connectStartServer();
 
 async function connectStopServer() {
     await appiumServer.close();
