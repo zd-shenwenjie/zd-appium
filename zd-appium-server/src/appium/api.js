@@ -1,5 +1,4 @@
-
-const { createSession, connectStartServer, connectStopServer } = require('./handler');
+const { createSession } = require('./handler');
 
 async function main() {
     const handler = await createSession({ port: 4723 }, { appPackage: "io.appium.android.apis", appActivity: ".ApiDemos" });
@@ -7,6 +6,3 @@ async function main() {
 }
 
 // main();
-
-
-
