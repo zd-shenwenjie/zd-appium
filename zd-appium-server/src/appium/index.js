@@ -19,17 +19,24 @@ app.listen(port, () => {
     logger.info(`App is listening on port ${port}`);
 });
 
-router.route('/connectStartServer').post(async(req, res) => {
+router.route('/').get((req, res) => {
+    res.status(200).json({
+        code: 200,
+        msg: 'appium server'
+    });
+});
+
+router.route('/connectStartServer').post(async (req, res) => {
     const args = req.body.args;
-    await connectStartServer(args);
+    // await connectStartServer(args);
     res.status(200).json({
         code: 200,
         msg: 'start appium server.'
     });
 });
 
-router.route('/connectStopServer').post(async(req, res) => {
-    await connectStopServer();
+router.route('/connectStopServer').post(async (req, res) => {
+    // await connectStopServer();
     res.status(200).json({
         code: 200,
         msg: 'stop appium server.'
