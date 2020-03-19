@@ -16,11 +16,14 @@ module.exports = {
         }, {
             test: /\.css$/,
             use: ['style-loader', 'css-loader']
+        }, {
+            test: /\.(png|jpg|gif|svg)$/,
+            use: ['file-loader']
         }]
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: './src/index.html'
+            template: './public/index.html'
         }),
         new CleanWebpackPlugin()
     ]
