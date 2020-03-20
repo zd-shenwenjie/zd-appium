@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Input, message } from 'antd';
+import { Button, Input, Tree, message } from 'antd';
 import 'antd/dist/antd.css';
 import MonacoEditor from 'react-monaco-editor';
 import AnsiConverter from 'ansi-to-html';
@@ -29,13 +29,15 @@ class App extends Component {
             activity: '',
             package: '',
             script: '',
-            logLines: []
-        }
+            logLines: [],
+            elements = {}
+        },
     }
 
     componentDidMount() {
         this.initScreen();
         this.initSocket();
+        this.initElements();
     }
 
     render() {
@@ -131,6 +133,10 @@ class App extends Component {
                 logLines: curLogLines
             })
         })
+    }
+
+    initElements() {
+        
     }
 
     handleMouseDownScreen(e) {
