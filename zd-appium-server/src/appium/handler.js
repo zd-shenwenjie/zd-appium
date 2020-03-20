@@ -5,14 +5,13 @@ const { getDefaultArgs } = require('appium/build/lib/parser');
 const { SEREVER_CONFIG, ANDROID_CAPS } = require('./config');
 const { fs, tempDir } = require('appium-support');
 const { logger } = require('../logger');
-const SocketClient = require('socket.io-client');
-const client = new SocketClient('http://localhost:7001');
 
-const LOG_SEND_INTERVAL_MS = 250;
 let appiumServer = null;
+let logSender = null;
 let logWatcher = null;
 let logFile = null;
 let batchedLogs = [];
+const LOG_SEND_INTERVAL_MS = 250;
 
 async function createSession(cfg, caps) {
     const handler = new AppiumMethodHandler(Object.assign(SEREVER_CONFIG, cfg), Object.assign(ANDROID_CAPS, caps));
@@ -40,10 +39,17 @@ async function connectStartServer(args) {
     logWatcher = setInterval(async () => {
         if (batchedLogs.length) {
             try {
-                const log = batchedLogs.map((log) => `[${log.level}] ${log.msg}`).join('\n');
-                await fs.writeFile(logFile, log, { flag: 'a' });
-                client.emit('log', log);
-            } catch (ign) { }
+                await fs.writeFile(
+                    logFile,
+                    batchedLogs.map((log) => `[${log.level}] ${log.msg}`).join('\n'),
+                    { flag: 'a' }
+                );
+                if (typeof logSender == 'function') {
+                    logSender(batchedLogs);
+                }
+            } catch (error) {
+                logger.error(error.message);
+            }
             batchedLogs.splice(0, batchedLogs.length);
         }
     }, LOG_SEND_INTERVAL_MS);
@@ -53,6 +59,10 @@ async function connectStartServer(args) {
 async function connectStopServer() {
     await appiumServer.close();
     clearInterval(logWatcher);
+}
+
+function setLogSender(sender) {
+    logSender = sender;
 }
 
 class AppiumMethodHandler {
@@ -87,6 +97,7 @@ class AppiumMethodHandler {
 }
 
 module.exports = {
+    setLogSender,
     createSession,
     connectStartServer,
     connectStopServer
