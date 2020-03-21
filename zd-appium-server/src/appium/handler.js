@@ -6,12 +6,13 @@ const { SEREVER_CONFIG, ANDROID_CAPS } = require('./config');
 const { fs, tempDir } = require('appium-support');
 const { logger } = require('../logger');
 
+const LOG_SEND_INTERVAL_MS = 250;
+
 let appiumServer = null;
 let logSender = null;
 let logWatcher = null;
 let logFile = null;
 let batchedLogs = [];
-const LOG_SEND_INTERVAL_MS = 250;
 
 async function createSession(cfg, caps) {
     const handler = new AppiumMethodHandler(Object.assign(SEREVER_CONFIG, cfg), Object.assign(ANDROID_CAPS, caps));

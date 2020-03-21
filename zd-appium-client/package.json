@@ -30,7 +30,7 @@
         "webpack-merge": "^4.2.2"
     },
     "scripts": {
-        "dev": "webpack-dev-server --hot --inline --open --config ./webpack/webpack.dev.cfg.js",
+        "start": "webpack-dev-server --hot --inline --open --config ./webpack/webpack.dev.cfg.js",
         "build": "webpack --config ./webpack/webpack.prod.cfg.js"
     }
 }
