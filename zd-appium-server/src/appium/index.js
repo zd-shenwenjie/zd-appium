@@ -1,4 +1,4 @@
-const { connectStartServer, connectStopServer, setLogSender } = require('./handler');
+const { connectStartServer, connectStopServer, isAppiumServerStarted, setLogSender } = require('./handler');
 const { logger } = require('../logger');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -20,12 +20,12 @@ const server = app.listen(port, () => {
 
 const socket = require('socket.io');
 const io = socket(server);
-// io.on('connection', function (socket) {
-//     console.log('a client connected.', socket.id);
-//     socket.on('disconnect', function () {
-//         console.log('client disconnected.', socket.id);
-//     });
-// })
+io.on('connection', function (socket) {
+    console.log('a client connected.', socket);
+    socket.on('disconnect', function () {
+        console.log('client disconnected.', socket.id);
+    });
+})
 
 setLogSender(function sendAppiumLog(batchedLogs) {
     io.emit('appium-log-line', batchedLogs);
@@ -45,5 +45,14 @@ router.route('/connectStopServer').post(async (req, res) => {
     res.status(200).json({
         code: 200,
         msg: 'stop appium server.'
+    })
+});
+
+router.route('/isAppiumServerStarted').get(async (req, res) => {
+    const status = isAppiumServerStarted();
+    res.status(200).json({
+        code: 200,
+        msg: 'get appium server status.',
+        data: status
     })
 });

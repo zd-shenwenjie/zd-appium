@@ -13,6 +13,7 @@ let logSender = null;
 let logWatcher = null;
 let logFile = null;
 let batchedLogs = [];
+let appiumServerStatus = false;
 
 async function createSession(cfg, caps) {
     const handler = new AppiumMethodHandler(Object.assign(SEREVER_CONFIG, cfg), Object.assign(ANDROID_CAPS, caps));
@@ -55,11 +56,17 @@ async function connectStartServer(args) {
         }
     }, LOG_SEND_INTERVAL_MS);
     appiumServer = await appium.main(args);
+    appiumServerStatus = true;
 }
 
 async function connectStopServer() {
     await appiumServer.close();
     clearInterval(logWatcher);
+    appiumServerStatus = false
+}
+
+function isAppiumServerStarted() {
+    return appiumServerStatus;
 }
 
 function setLogSender(sender) {
@@ -101,5 +108,6 @@ module.exports = {
     setLogSender,
     createSession,
     connectStartServer,
-    connectStopServer
+    connectStopServer,
+    isAppiumServerStarted,
 };

@@ -15,6 +15,11 @@
             "name": "frontend",
             "port": 7003,
             "enabled": true
+        },
+        {
+            "name": "android",
+            "port": 7004,
+            "enabled": true
         }
     ]
 }
