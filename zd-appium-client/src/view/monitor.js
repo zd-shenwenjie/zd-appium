@@ -2,8 +2,10 @@ import React, { Component } from 'react';
 import { Button } from 'antd';
 import 'antd/dist/antd.css';
 import AnsiConverter from 'ansi-to-html';
+import { setAppiumLogHandler } from '../http/api';
 
 const convert = new AnsiConverter({ fg: '#bbb', bg: '#222' });
+const MAX_LOG_LINE = 300;
 
 class Monitor extends Component {
     constructor(props) {
@@ -13,17 +15,23 @@ class Monitor extends Component {
         }
     }
 
+    componentDidMount() {
+        setAppiumLogHandler((batchedLogs) => {
+            const curLogLines = [...this.state.logs, ...batchedLogs];
+            const length = curLogLines.length;
+            if (length > MAX_LOG_LINE) {
+                curLogLines.splice(0, length - MAX_LOG_LINE);
+            }
+            this.setState({
+                logs: curLogLines
+            })
+        })
+    }
+
     render() {
         return (
-            <div style={{ width: '50%' }}>
-
-                <div style={{ width: '100%', height: "40px", background: 'lightgray' }}>
-                    <Button style={{ width: '20%', height: '30px', margin: '5px', float: 'right' }} >
-                        Log File
-                    </Button>
-                </div >
-
-                <div style={{ width: '100%', height: "500px", background: 'black' }}>
+            <div >
+                <div style={{ width: '100%', height: "800px", background: 'black' }}>
                     {
                         this.state.logs.map((log, index) => {
                             return (

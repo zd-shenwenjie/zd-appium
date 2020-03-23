@@ -25,10 +25,10 @@ class Screen extends Component {
         // const h = bottom - top;
         // console.log(x, y, w, h);
     }
-
+    
     render() {
         return (
-            <div style={{ width: '50%' }}>
+            <div>
                 <div style={{ width: '100%', height: "40px", background: 'lightgray' }}>
                     <Radio.Group style={{ margin: '5px' }} value={this.state.touchEvent} onChange={this.handleChangeTouchEvent.bind(this)}>
                         <Radio.Button value="tap">Tap By Coordinates</Radio.Button>
@@ -38,12 +38,7 @@ class Screen extends Component {
                         Screenshot
                     </Button>
                 </div>
-
-
-                <div style={{
-                    width: '100%', 
-                    height: '500px'
-                }}>
+                <div style={{ width: '100%', height: '500px' }}>
                     <img
                         style={{ width: '100%', height: '100%' }}
                         src={this.state.screenImage}

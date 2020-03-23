@@ -14,7 +14,7 @@ class Editor extends Component {
 
     render() {
         return (
-            <div style={{ width: '50%'}}>
+            <div >
                 <div style={{ width: '100%', height: '40px', background: 'lightgray' }}>
                     <Button
                         style={{ width: '20%', height: '30px', margin:'5px', float: 'right' }}
@@ -22,7 +22,7 @@ class Editor extends Component {
                         Run Script
                     </Button>
                 </div>
-                <div style={{ width: '100%', height: '500px' }} >
+                <div style={{ width: '100%', height: '1040px' }} >
                     <MonacoEditor
                         style={{ width: '100%', height: '100%' }}
                         language="javascript"
