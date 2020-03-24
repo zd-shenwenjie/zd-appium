@@ -34,7 +34,7 @@ router.route('/devcies').get((req, res) => {
 
 router.route('/model').get((req, res) => {
     const buf = execSync('adb shell getprop ro.product.model');
-    const platform = buf.toString().replace('\r\n','');
+    const platform = buf.toString().replace('\r\n', '');
     res.status(200).json({
         code: 200,
         msg: 'adb shell getprop ro.product.model',
@@ -44,7 +44,7 @@ router.route('/model').get((req, res) => {
 
 router.route('/platform').get((req, res) => {
     const buf = execSync('adb shell getprop ro.build.version.release');
-    const platform = buf.toString().replace('\r\n','');
+    const platform = buf.toString().replace('\r\n', '');
     res.status(200).json({
         code: 200,
         msg: 'adb shell getprop ro.build.version.release',
@@ -52,3 +52,51 @@ router.route('/platform').get((req, res) => {
     })
 });
 
+router.route('/packages').get((req, res) => {
+    const buf = execSync('adb shell pm list packages');
+    const packages = buf.toString()
+        .split('\r\n')
+        .filter(p => {
+            return p.indexOf('package') != -1
+        })
+        .map(p => {
+            const arr = p.split(':')
+            return arr[1];
+        })
+    res.status(200).json({
+        code: 200,
+        msg: 'adb shell pm list packages',
+        data: packages
+    })
+});
+
+router.route('/activity').get((req, res) => {
+    const pkg = req.query.pkg;
+    const buf = execSync(`adb shell dumpsys package ${pkg}`);
+    const str = buf.toString();
+    const arr = str.split('\r\n');
+    const start = arr.findIndex(str => { return str.indexOf('android.intent.action.MAIN:') != -1 })
+    const end = arr.findIndex(str => { return str.indexOf('Category: "android.intent.category.LAUNCHER"') != -1 });
+    if (start != -1 && end != -1) {
+        const info = arr.slice(start, end).find(s => s.indexOf(pkg) != -1).replace(/\s+/g, '');
+        if (info && info.indexOf('/') != -1 && info.indexOf('filter') != -1) {
+            const activity = info.substring(info.indexOf('/') + 1, info.indexOf('filter'));
+            res.status(200).json({
+                code: 200,
+                msg: `adb shell dumpsys package ${pkg}`,
+                data: activity
+            })
+        } else {
+            res.status(400).json({
+                code: 400,
+                msg: `adb shell dumpsys package ${pkg}`,
+                data: 'Parse Error.'
+            })
+        }
+    } else {
+        res.status(200).json({
+            code: 200,
+            msg: `Not Found`
+        })
+    }
+});

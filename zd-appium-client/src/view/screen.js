@@ -7,6 +7,7 @@ class Screen extends Component {
 
     constructor(props) {
         super(props);
+        // this.screen = null;
         this.state = {
             screenImage: image_screen,
             touchEvent: 'tap'
@@ -25,7 +26,7 @@ class Screen extends Component {
         // const h = bottom - top;
         // console.log(x, y, w, h);
     }
-    
+
     render() {
         return (
             <div>
@@ -43,7 +44,7 @@ class Screen extends Component {
                         style={{ width: '100%', height: '100%' }}
                         src={this.state.screenImage}
                         onMouseDown={this.handleMouseDownScreen.bind(this)}
-                        ref={(screen) => this.screen = screen}
+                        // ref={(screen) => this.screen = screen}
                     />
                 </div>
             </div>

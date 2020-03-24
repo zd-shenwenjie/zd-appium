@@ -31,7 +31,7 @@ class Monitor extends Component {
     render() {
         return (
             <div >
-                <div style={{ width: '100%', height: "800px", background: 'black' }}>
+                <div style={{ width: '100%', height: "800px", background: 'black' , overflow: 'auto'}}>
                     {
                         this.state.logs.map((log, index) => {
                             return (
