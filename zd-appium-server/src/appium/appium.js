@@ -11,18 +11,20 @@ const LOG_SEND_INTERVAL_MS = 250;
 let appiumServer = null;
 let appiumHandler = null;
 let appiumSender = null;
+let appiumOwner = null;
 let logWatcher = null;
 let logFile = null;
 let batchedLogs = [];
 let isStarted = false;
 
-async function createSession(cfg, caps) {
+async function createSession(cfg, caps, owner) {
     let sessionId = null;
     try {
         const handler = new AppiumHandler();
         handler.addListener(appiumHandlerListener);
         await handler.initialize(cfg, caps);
         appiumHandler = handler;
+        appiumOwner = owner;
         sessionId = appiumHandler.sessionId;
         if (typeof appiumSender == 'function') {
             appiumSender('new_session');
@@ -37,6 +39,7 @@ async function killSession() {
     if (appiumHandler) {
         await appiumHandler.close();
         appiumHandler = null;
+        appiumOwner = null;
         if (typeof appiumSender == 'function') {
             appiumSender('kill_session');
         }
@@ -44,9 +47,9 @@ async function killSession() {
 }
 
 const appiumHandlerListener = function (status) {
-    if(status == 'invalid' || status == 'error') {
+    if (status == 'invalid' || status == 'error') {
         killSession();
-        appiumSender('session_invalid');
+        appiumSender('session_invalid', appiumOwner.socketId);
     }
 }
 
@@ -122,9 +125,17 @@ function appiumServerStatus() {
             caps: appiumHandler.capabilities
         };
     }
+    let owner = {};
+    if (appiumOwner) {
+        owner = { 
+            ip: appiumOwner.ip ,
+            socketId: appiumOwner.socketId
+        }
+    }
     return {
         isStarted,
-        handler
+        handler,
+        owner
     };
 }
 

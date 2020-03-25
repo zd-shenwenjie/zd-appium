@@ -29,13 +29,32 @@ const server = app.listen(port, () => {
 });
 
 const io = require('socket.io')(server);
+const users = {}; //{socketId:ip}
+
 io.on('connection', function (socket) {
+
+    saveUser(socket);
     socket.emit('appium-connection-user', socket.id);
+
     socket.on('appium-session-alive', function (sessionId) {
         connectKeepAlive(sessionId);
         console.log('alive->' + sessionId)
+    });
+
+    socket.on('disconnect', function () {
+        if (users.hasOwnProperty(socket.id)) {
+            delete users[socket.id];
+            console.log('remove ' + socket.id)
+        }
     })
 })
+
+function saveUser(socket) {
+    const addr = socket.handshake.address;;
+    console.log('addr->' + addr);
+    const ip = addr.replace('::ffff:', '');
+    users[socket.id] = ip;
+}
 
 setAppiumSender(
     function (event, args) {
@@ -56,6 +75,9 @@ setAppiumSender(
                 io.emit('appium-kill-session');
                 break;
             case 'session_invalid':
+                if (io.sockets.connected[args]) {
+                    io.sockets.connected[args].emit('appium-session-invalid');
+                }
                 break;
         }
     }
@@ -79,16 +101,23 @@ router.route('/connectStopServer').post(async (req, res) => {
 });
 
 router.route('/createSession').post(async (req, res) => {
-    const appiumServerConfig = {};
-    const { model, platform, pkg, activity } = req.body;
-    console.log(model, platform, pkg, activity)
-    if (model && platform && pkg && activity) {
-        const sessionId = await createSession(appiumServerConfig, {
-            platformVersion: platform,
-            deviceName: model,
-            appActivity: activity,
-            appPackage: pkg
-        });
+    const { model, platform, pkg, activity, userId } = req.body;
+    if (model && platform && pkg && activity && userId && users.hasOwnProperty(userId)) {
+        const appiumServerConfig = {};
+        const owner = {
+            socketId: userId,
+            ip: users[userId]
+        }
+        const sessionId = await createSession(
+            appiumServerConfig,
+            {
+                platformVersion: platform,
+                deviceName: model,
+                appActivity: activity,
+                appPackage: pkg
+            },
+            owner
+        );
         if (sessionId) {
             res.status(200).json({
                 code: 200,

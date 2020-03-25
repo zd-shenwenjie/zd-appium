@@ -23,10 +23,10 @@ const appiumClient = new SocketClient('http://localhost:7001');
 let appiumLogListeners = [];
 let appiumSessionListeners = [];
 let appiumServerListeners = [];
-let useId = null;
+let socketId = null;
 appiumClient.on('appium-connection-user', (id) => {
-    useId = id;
-    console.log('uid->' + id)
+    socketId = id;
+    console.log('socketId->' + id)
 })
 
 appiumClient.on('appium-start-server', () => {
@@ -154,11 +154,11 @@ export function getAppiumLog() {
 
 export function createSession(model, platform, pkg, activity) {
     return axios.post(URL_APPIUM_CREATE_SESSION, {
-        // model: 'SCM-W09',
-        // platform: '9.0',
-        // pkg: 'de.eso.car.audi',
-        // activity: 'de.eso.car.ui.MainActivity'
-        model, platform, pkg, activity
+        model,
+        platform,
+        pkg,
+        activity,
+        userId: socketId
     });
 }
 
