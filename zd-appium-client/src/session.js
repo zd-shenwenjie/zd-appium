@@ -5,7 +5,7 @@ import Monitor from './view/monitor';
 import {
     startAppiumServer,
     stopAppiumServer,
-    isAppiumServerStarted,
+    appiumServerStatus,
     getAppiumLog,
     getDevices,
     getPlatform,
@@ -13,16 +13,18 @@ import {
     getPackages,
     getActivity,
     createSession,
-    killSession
+    killSession,
+    addAppiumServerLister,
+    addSessionListener
 } from './http/api';
 
 const { Option } = Select;
-
 class Session extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            sessionId: '',
+            isCreateSessionReady: true,
+            isKillSessionReady: true,
             status: 'stop',
             activity: '',
             model: '',
@@ -38,6 +40,35 @@ class Session extends Component {
         this.handleGetAndroidModel();
         this.handleGetAndroidPlatform();
         this.handleGetAndroidPackages();
+        addAppiumServerLister((status) => {
+            if (status == 'start') {
+                this.setState({
+                    status: 'start',
+                    isCreateSessionReady: true,
+                    isKillSessionReady: false
+                });
+            } else if (status == 'stop') {
+                this.setState({
+                    status: 'stop',
+                    isCreateSessionReady: false,
+                    isKillSessionReady: false
+                });
+            }
+        });
+        addSessionListener((status) => {
+            if (status == 'new') {
+                this.setState({
+                    isCreateSessionReady: false,
+                    isKillSessionReady: true
+                })
+            } else if (status == 'kill') {
+                this.setState({
+                    isCreateSessionReady: true,
+                    isKillSessionReady: false
+                })
+
+            }
+        });
     }
 
     render() {
@@ -61,8 +92,8 @@ class Session extends Component {
                         }
                     </Select>
                     <Input style={{ width: '150px', height: '30px', marginLeft: '10px' }} placeholder="Activity" value={this.state.activity} onChange={this.handleChangeActivity.bind(this)} />
-                    <Button disabled={this.state.sessionId} style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleCreateSession.bind(this)}>Create Session</Button>
-                    <Button disabled={!this.state.sessionId} style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleKillSession.bind(this)}>Kill Session</Button>
+                    <Button disabled={!this.state.isCreateSessionReady} style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleCreateSession.bind(this)}>Create Session</Button>
+                    <Button disabled={!this.state.isKillSessionReady} style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleKillSession.bind(this)}>Kill Session</Button>
                 </div>
                 <div style={{ width: '1270px', height: '30px', margin: '10px' }}>
                     <Button type="link" onClick={this.handleGetAppiumServerStatus.bind(this)}>Get Appium Server Status</Button>
@@ -73,7 +104,7 @@ class Session extends Component {
                     <Button type="link" onClick={this.handleGetAndroidPackages.bind(this)} >Get Packages </Button>
                     <Button type="link" onClick={this.handleGetAndroidActivity.bind(this)} >Get Activity </Button>
                 </div>
-                <div style={{ width: '1270px', margin: '10px' }}>
+                <div style={{ width: '1320px', margin: '10px' }}>
                     <Monitor />
                 </div>
             </div>
@@ -141,13 +172,32 @@ class Session extends Component {
     }
 
     handleGetAppiumServerStatus() {
-        isAppiumServerStarted().then(res => {
+        appiumServerStatus().then(res => {
             const result = res.data;
             console.log(JSON.stringify(result));
-            if (result.data) {
-                this.setState({ status: 'start' });
+            const isStarted = result.data.isStarted;
+            const hanlder = result.data.handler;
+            if (isStarted) {
+                this.setState({
+                    status: 'start'
+                });
+                if (hanlder && hanlder.hasOwnProperty('caps') && hanlder.hasOwnProperty('cfg')) {
+                    this.setState({
+                        isCreateSessionReady: false,
+                        isKillSessionReady: true
+                    })
+                } else {
+                    this.setState({
+                        isCreateSessionReady: true,
+                        isKillSessionReady: false
+                    })
+                }
             } else {
-                this.setState({ status: 'stop' });
+                this.setState({
+                    status: 'stop',
+                    isCreateSessionReady: false,
+                    isKillSessionReady: false
+                });
             }
         }).catch(error => {
             message.error(error.message);
@@ -195,7 +245,9 @@ class Session extends Component {
             startAppiumServer().then(res => {
                 const result = res.data;
                 message.success(JSON.stringify(result));
-                this.setState({ status: 'start' });
+                this.setState({
+                    status: 'start'
+                });
             }).catch(error => {
                 message.error(error.message);
             });
@@ -220,12 +272,10 @@ class Session extends Component {
                 const result = res.data;
                 console.log(JSON.stringify(result));
                 const id = result.data;
-                this.setState({
-                    sessionId: id
-                });
                 if (id) {
                     window.open('http://localhost:8000/#/main', '_blank').focus();
                     window.localStorage.setItem('sessionId', id);
+                    // window.localStorage.setItem('sessionId', 'abcderfg');
                 }
             }).catch(error => {
                 message.error(error.message);
@@ -246,13 +296,10 @@ class Session extends Component {
     }
 
     handleKillSession() {
-        const id = this.state.sessionId;
-        killSession(id).then(res => {
+        killSession().then(res => {
             const result = res.data;
             message.success(JSON.stringify(result));
-            this.setState({
-                sessionId: ''
-            })
+            console.log(JSON.stringify(result));
         }).catch(error => {
             message.error(error.message);
         })

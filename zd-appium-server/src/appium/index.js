@@ -1,12 +1,14 @@
 const {
+    setAppiumSender,
     connectStartServer,
     connectStopServer,
-    isAppiumServerStarted,
-    setLogSender,
+    appiumServerStatus,
     readLogFile,
     createSession,
-    killSession
-} = require('./handler');
+    killSession,
+    connectKeepAlive
+} = require('./appium');
+
 const { logger } = require('../logger');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -26,18 +28,38 @@ const server = app.listen(port, () => {
     logger.info(`App is listening on port ${port}`);
 });
 
-const socket = require('socket.io');
-const io = socket(server);
+const io = require('socket.io')(server);
 io.on('connection', function (socket) {
-    // console.log('a client connected.', socket.id);
-    socket.on('disconnect', function () {
-        // console.log('client disconnected.', socket.id);
-    });
+    socket.emit('appium-connection-user', socket.id);
+    socket.on('appium-session-alive', function (sessionId) {
+        connectKeepAlive(sessionId);
+        console.log('alive->' + sessionId)
+    })
 })
 
-setLogSender(function sendAppiumLog(batchedLogs) {
-    io.emit('appium-log-line', batchedLogs);
-});
+setAppiumSender(
+    function (event, args) {
+        switch (event) {
+            case 'start_server':
+                io.emit('appium-start-server');
+                break;
+            case 'stop_server':
+                io.emit('appium-stop-server');
+                break;
+            case 'send_log':
+                io.emit('appium-log-line', args);
+                break;
+            case 'new_session':
+                io.emit('appium-new-session');
+                break;
+            case 'kill_session':
+                io.emit('appium-kill-session');
+                break;
+            case 'session_invalid':
+                break;
+        }
+    }
+);
 
 router.route('/connectStartServer').post(async (req, res) => {
     const args = req.body.args;
@@ -53,24 +75,6 @@ router.route('/connectStopServer').post(async (req, res) => {
     res.status(200).json({
         code: 200,
         msg: 'stop appium server.'
-    })
-});
-
-router.route('/isAppiumServerStarted').get((req, res) => {
-    const status = isAppiumServerStarted();
-    res.status(200).json({
-        code: 200,
-        msg: 'get appium server status.',
-        data: status
-    })
-});
-
-router.route('/log').get(async (req, res) => {
-    const log = await readLogFile();
-    res.status(200).json({
-        code: 200,
-        msg: 'read log file.',
-        data: log
     })
 });
 
@@ -106,11 +110,27 @@ router.route('/createSession').post(async (req, res) => {
 });
 
 router.route('/killSession').post(async (req, res) => {
-    const sessionId = req.body.sessionId;
-    await killSession(sessionId);
+    await killSession();
     res.status(200).json({
         code: 200,
         msg: `kill session ${sessionId}`
     })
 });
 
+router.route('/appiumServerStatus').get((req, res) => {
+    const status = appiumServerStatus();
+    res.status(200).json({
+        code: 200,
+        msg: 'get appium server status.',
+        data: status
+    })
+});
+
+router.route('/log').get(async (req, res) => {
+    const log = await readLogFile();
+    res.status(200).json({
+        code: 200,
+        msg: 'read log file.',
+        data: log
+    })
+});
