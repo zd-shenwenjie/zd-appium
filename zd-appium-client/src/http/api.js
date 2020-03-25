@@ -13,11 +13,15 @@ const URL_APPIUM_STOP = URL_APPIUM_SERVER + '/connectStopServer';
 const URL_APPIUM_LOG = URL_APPIUM_SERVER + '/log';
 const URL_APPIUM_CREATE_SESSION = URL_APPIUM_SERVER + '/createSession';
 const URL_APPIUM_KILL_SESSION = URL_APPIUM_SERVER + '/killSession';
+const URL_APPIUM_SOURCE = URL_APPIUM_SERVER + '/source';
+const URL_APPIUM_SCREENSHOT = URL_APPIUM_SERVER + '/screenshot';
+
 const URL_ANDROID_DEVICE = URL_ANDROID_SERVER + '/devcies';
 const URL_ANDROID_PLATFORM = URL_ANDROID_SERVER + '/platform';
 const URL_ANDROID_MODEL = URL_ANDROID_SERVER + '/model';
 const URL_ANDROID_PACKAGE = URL_ANDROID_SERVER + '/packages';
 const URL_ANDROID_ACTIVITY = URL_ANDROID_SERVER + '/activity';
+
 
 const appiumClient = new SocketClient('http://localhost:7001');
 let appiumLogListeners = [];
@@ -45,10 +49,10 @@ appiumClient.on('appium-stop-server', () => {
     }
 })
 
-appiumClient.on('appium-new-session', () => {
+appiumClient.on('appium-new-session', (owner) => {
     for (const appiumSessionListener of appiumSessionListeners) {
         if (typeof appiumSessionListener == 'function') {
-            appiumSessionListener('new');
+            appiumSessionListener('new', owner);
         }
     }
 })
@@ -164,4 +168,12 @@ export function createSession(model, platform, pkg, activity) {
 
 export function killSession() {
     return axios.post(URL_APPIUM_KILL_SESSION);
+}
+
+export function readAppSource() {
+    return axios.get(URL_APPIUM_SOURCE);
+}
+
+export function takeAppScreenshot() {
+    return axios.get(URL_APPIUM_SCREENSHOT);
 }

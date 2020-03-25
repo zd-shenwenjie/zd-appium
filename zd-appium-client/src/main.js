@@ -24,11 +24,11 @@ class Main extends Component {
             addSessionListener(function (status) {
                 if (status == 'invalid') {
                     killKeepAlive();
-                    console.log('Appium Session Invalid.')
-                    message.warn('Appium Session Invalid.')
+                    console.log('Appium Session is Invalid.')
+                    message.warn('Appium Session is Invalid.')
                 } else if (status == 'kill') {
                     killKeepAlive();
-                    console.log('Appium Session killed.')
+                    console.log('Appium Session is killed.')
                     message.warn('Appium Session killed.')
                 }
             });

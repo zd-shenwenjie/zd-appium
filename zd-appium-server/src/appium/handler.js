@@ -42,7 +42,6 @@ class AppiumHandler {
 
     keepSessionAlive() {
         this._lastActiveMoment = +(new Date());
-        logger.warn('@@@@@' + this._lastActiveMoment);
     }
 
     runKeepAliveLoop() {
@@ -74,17 +73,15 @@ class AppiumHandler {
         }
     }
 
-    // async fetchElement(strategy, selector) {
+    async source(){
+        const source = await this.driver.source();
+        return source;
+    } 
 
-    // }
-
-    // async fetchElements(strategy, selector) {
-
-    // }
-
-    // async execute({ elementId, methodName, args, skipScreenshotAndSource }) {
-
-    // }
+    async takeScreenshot(){
+        const screenshot = await this.driver.takeScreenshot();
+        return screenshot;
+    }
 
 }
 

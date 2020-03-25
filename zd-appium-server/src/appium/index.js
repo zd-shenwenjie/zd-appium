@@ -6,7 +6,9 @@ const {
     readLogFile,
     createSession,
     killSession,
-    connectKeepAlive
+    connectKeepAlive,
+    readAppSource,
+    takeAppScreenshot
 } = require('./appium');
 
 const { logger } = require('../logger');
@@ -24,9 +26,15 @@ app.use(router);
 const args = process.argv.splice(2);
 const port = args[0];
 
-const server = app.listen(port, () => {
-    logger.info(`App is listening on port ${port}`);
-});
+const server = app.listen(
+    {
+        host: 'localhost',
+        port,
+        exclusive: true
+    },
+    () => {
+        logger.info(`App is listening on port ${port}`);
+    });
 
 const io = require('socket.io')(server);
 const users = {}; //{socketId:ip}
@@ -50,9 +58,8 @@ io.on('connection', function (socket) {
 })
 
 function saveUser(socket) {
-    const addr = socket.handshake.address;;
-    console.log('addr->' + addr);
-    const ip = addr.replace('::ffff:', '');
+    const ip = socket.handshake.address;
+    console.log('ip->' + ip);
     users[socket.id] = ip;
 }
 
@@ -69,7 +76,7 @@ setAppiumSender(
                 io.emit('appium-log-line', args);
                 break;
             case 'new_session':
-                io.emit('appium-new-session');
+                io.emit('appium-new-session', args);
                 break;
             case 'kill_session':
                 io.emit('appium-kill-session');
@@ -162,4 +169,36 @@ router.route('/log').get(async (req, res) => {
         msg: 'read log file.',
         data: log
     })
+});
+
+router.route('/source').get(async (req, res) => {
+    const source = await readAppSource();
+    if(source) {
+        res.status(200).json({
+            code: 200,
+            msg: 'read app source.',
+            data: source
+        })
+    } else {
+        res.status(500).json({
+            code: 500,
+            msg: 'read app source error.'
+        })
+    }
+});
+
+router.route('/screenshot').get(async (req, res) => {
+    const screenshot = await takeAppScreenshot();
+    if (screenshot) {
+        res.status(200).json({
+            code: 200,
+            msg: 'take app screenshot.',
+            data: screenshot
+        })
+    } else {
+        res.status(500).json({
+            code: 500,
+            msg: 'take app screenshot error.'
+        })
+    }
 });

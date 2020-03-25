@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import { Button, Tree, List, Typography } from 'antd';
+import { Button, Tree, List, Typography, message } from 'antd';
 import 'antd/dist/antd.css';
-
+import {
+    readAppSource
+} from '../http/api';
 class Elements extends Component {
     constructor(props) {
         super(props);
@@ -122,7 +124,7 @@ class Elements extends Component {
             <div >
 
                 <div style={{ width: '100%', height: "40px", background: 'lightgray' }}>
-                    <Button style={{ width: '20%', height: '30px', margin: '5px', float: 'right' }} >
+                    <Button style={{ width: '20%', height: '30px', margin: '5px', float: 'right' }} onClick={this.handleAppCrawler.bind(this)}>
                         App Crawler
                     </Button>
                 </div >
@@ -159,6 +161,15 @@ class Elements extends Component {
 
     handleSelectElement(selectedKeys, info) {
         console.log(selectedKeys, info);
+    }
+
+    handleAppCrawler() {
+        readAppSource().then(res => {
+            const result = res.data;
+            console.log(JSON.stringify(result));
+        }).catch(error => {
+            message.error(error.message);
+        });
     }
 }
 

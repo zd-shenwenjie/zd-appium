@@ -30,7 +30,8 @@ class Session extends Component {
             model: '',
             platform: '',
             package: '',
-            packages: []
+            packages: [],
+            ownerIP: ''
         }
     }
 
@@ -55,19 +56,22 @@ class Session extends Component {
                 });
             }
         });
-        addSessionListener((status) => {
+        addSessionListener((status, owner) => {
             if (status == 'new') {
                 this.setState({
                     isCreateSessionReady: false,
-                    isKillSessionReady: true
+                    isKillSessionReady: true,
+                    ownerIP: owner.ip
                 })
             } else if (status == 'kill') {
                 this.setState({
                     isCreateSessionReady: true,
-                    isKillSessionReady: false
+                    isKillSessionReady: false,
+                    ownerIP: ''
                 })
 
             }
+            console.log(status)
         });
     }
 
@@ -95,15 +99,21 @@ class Session extends Component {
                     <Button disabled={!this.state.isCreateSessionReady} style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleCreateSession.bind(this)}>Create Session</Button>
                     <Button disabled={!this.state.isKillSessionReady} style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleKillSession.bind(this)}>Kill Session</Button>
                 </div>
-                <div style={{ width: '1270px', height: '30px', margin: '10px' }}>
-                    <Button type="link" onClick={this.handleGetAppiumServerStatus.bind(this)}>Get Appium Server Status</Button>
-                    <Button type="link" onClick={this.handleGetAppiumServerLog.bind(this)}>Get Appium Server Log</Button>
-                    <Button type="link" onClick={this.handleGetAndroidDevices.bind(this)}>Get Device</Button>
-                    <Button type="link" onClick={this.handleGetAndroidPlatform.bind(this)}>Get Platform Version</Button>
-                    <Button type="link" onClick={this.handleGetAndroidModel.bind(this)}>Get Device Model</Button>
-                    <Button type="link" onClick={this.handleGetAndroidPackages.bind(this)} >Get Packages </Button>
-                    <Button type="link" onClick={this.handleGetAndroidActivity.bind(this)} >Get Activity </Button>
+                <div style={{ width: '1320px', margin: '10px' }}>
+                    {
+                        this.state.ownerIP ? <span style={{ float: 'right', color: 'blue' }} >{`${this.state.ownerIP} is Running`} </span> : null
+                    }
                 </div>
+                <div style={{ width: '1270px', height: '30px', margin: '10px' }}>
+                    <Button style={{ width: '150px', height: '30px' }} onClick={this.handleGetAppiumServerStatus.bind(this)}>Server Status</Button>
+                    <Button style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleGetAppiumServerLog.bind(this)}>Server Log</Button>
+                    <Button style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleGetAndroidDevices.bind(this)}>Android Device</Button>
+                    <Button style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleGetAndroidPlatform.bind(this)}>Platform Version</Button>
+                    <Button style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleGetAndroidModel.bind(this)}>Device Model</Button>
+                    <Button style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleGetAndroidPackages.bind(this)} >Android Packages </Button>
+                    <Button style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleGetAndroidActivity.bind(this)} >Android Activity </Button>
+                </div>
+
                 <div style={{ width: '1320px', margin: '10px' }}>
                     <Monitor />
                 </div>

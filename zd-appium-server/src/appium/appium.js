@@ -27,7 +27,7 @@ async function createSession(cfg, caps, owner) {
         appiumOwner = owner;
         sessionId = appiumHandler.sessionId;
         if (typeof appiumSender == 'function') {
-            appiumSender('new_session');
+            appiumSender('new_session', owner);
         }
     } catch (error) {
         logger.error('createSession err->' + error.message);
@@ -127,8 +127,8 @@ function appiumServerStatus() {
     }
     let owner = {};
     if (appiumOwner) {
-        owner = { 
-            ip: appiumOwner.ip ,
+        owner = {
+            ip: appiumOwner.ip,
             socketId: appiumOwner.socketId
         }
     }
@@ -154,6 +154,22 @@ async function readLogFile() {
     return log;
 }
 
+async function readAppSource() {
+    let source;
+    if (appiumHandler) {
+        source = appiumHandler.source();
+    }
+    return source;
+}
+
+async function takeAppScreenshot() {
+    let screenshot;
+    if (appiumHandler) {
+        screenshot = appiumHandler.takeScreenshot();
+    }
+    return screenshot;
+}
+
 module.exports = {
     readLogFile,
     createSession,
@@ -162,5 +178,7 @@ module.exports = {
     connectStopServer,
     appiumServerStatus,
     connectKeepAlive,
-    setAppiumSender
+    setAppiumSender,
+    readAppSource,
+    takeAppScreenshot
 };
