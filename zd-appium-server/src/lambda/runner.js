@@ -1,5 +1,5 @@
 var vm = require('vm');
-const api = require('../appium/api')
+const api = require('../appium/zdapi')
 
 class AppiumClient {
     /**

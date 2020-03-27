@@ -4,8 +4,9 @@ import axios from 'axios';
 // const URL_SERVER_BASE = 'http://localhost:7000/api';
 // const URL_APPIUM_SERVER = URL_SERVER_BASE + '/appium'
 // const URL_ANDROID_SERVER = URL_SERVER_BASE + '/android';
-const URL_APPIUM_SERVER = 'http://localhost:7001'
-const URL_ANDROID_SERVER = 'http://localhost:7004';
+const URL_APPIUM_SERVER = 'http://192.168.3.82:7001';
+const URL_ANDROID_SERVER = 'http://192.168.3.82:7004';
+const appiumClient = new SocketClient('http://192.168.3.82:7001');
 
 const URL_APPIUM_STATUS = URL_APPIUM_SERVER + '/appiumServerStatus';
 const URL_APPIUM_START = URL_APPIUM_SERVER + '/connectStartServer';
@@ -23,7 +24,6 @@ const URL_ANDROID_PACKAGE = URL_ANDROID_SERVER + '/packages';
 const URL_ANDROID_ACTIVITY = URL_ANDROID_SERVER + '/activity';
 
 
-const appiumClient = new SocketClient('http://localhost:7001');
 let appiumLogListeners = [];
 let appiumSessionListeners = [];
 let appiumServerListeners = [];

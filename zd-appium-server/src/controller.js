@@ -31,4 +31,4 @@ function startServer(server) {
 
 module.exports = {
     servers
-}
+};

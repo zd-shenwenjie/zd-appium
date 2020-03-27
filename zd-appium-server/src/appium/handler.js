@@ -19,7 +19,7 @@ class AppiumHandler {
     async initialize(cfg, caps) {
         try {
             cfg = Object.assign(SEREVER_CONFIG, cfg);
-            caps = Object.assign(ANDROID_CAPS, caps)
+            caps = Object.assign(ANDROID_CAPS, caps);
             this.driver = await wd.promiseChainRemote(cfg);
             await this.driver.init(caps);
             this.serverConfig = cfg;
