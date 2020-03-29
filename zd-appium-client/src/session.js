@@ -3,6 +3,7 @@ import { Button, Input, Radio, Select, message } from 'antd';
 import 'antd/dist/antd.css';
 import Monitor from './view/monitor';
 import {
+    connection,
     startAppiumServer,
     stopAppiumServer,
     appiumServerStatus,
@@ -14,6 +15,7 @@ import {
     getActivity,
     createSession,
     killSession,
+    addAppiumClientListener,
     addAppiumServerLister,
     addSessionListener
 } from './http/api';
@@ -22,6 +24,7 @@ const { Option } = Select;
 class Session extends Component {
     constructor(props) {
         super(props);
+        this.userId = '';
         this.state = {
             isCreateSessionReady: true,
             isKillSessionReady: true,
@@ -41,6 +44,18 @@ class Session extends Component {
         this.handleGetAndroidModel();
         this.handleGetAndroidPlatform();
         this.handleGetAndroidPackages();
+        addAppiumClientListener((status, args) => {
+            if (status == 'uid') {
+                this.userId = args;
+                console.log('socket client uid = ' + this.userId);
+            } else if (status == 'error') {
+                this.userId = null;
+                console.log('socket client error.');
+            } else if (status == 'timeout') {
+                this.userId = null;
+                console.log('socket client timeout.');
+            }
+        });
         addAppiumServerLister((status) => {
             if (status == 'start') {
                 this.setState({
@@ -63,16 +78,16 @@ class Session extends Component {
                     isKillSessionReady: true,
                     ownerIP: owner.ip
                 })
-            } else if (status == 'kill') {
+            } else if (status == 'kill' || status == 'invalid') {
                 this.setState({
                     isCreateSessionReady: true,
                     isKillSessionReady: false,
                     ownerIP: ''
                 })
-
             }
             console.log(status)
         });
+        connection();
     }
 
     render() {
@@ -277,8 +292,8 @@ class Session extends Component {
         const platform = this.state.platform;
         const pkg = this.state.package;
         const activity = this.state.activity;
-        if (model && platform && pkg && activity) {
-            createSession(model, platform, pkg, activity).then(res => {
+        if (model && platform && pkg && activity && this.userId) {
+            createSession(model, platform, pkg, activity, this.userId).then(res => {
                 const result = res.data;
                 console.log(JSON.stringify(result));
                 const id = result.data;

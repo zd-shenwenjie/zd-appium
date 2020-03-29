@@ -8,7 +8,8 @@ const {
     killSession,
     connectKeepAlive,
     readAppSource,
-    takeAppScreenshot
+    takeAppScreenshot,
+    windowSize
 } = require('./appium');
 
 const { logger } = require('../logger');
@@ -26,15 +27,9 @@ app.use(router);
 const args = process.argv.splice(2);
 const port = args[0];
 
-const server = app.listen(
-    {
-        host: 'localhost',
-        port,
-        exclusive: true
-    },
-    () => {
-        logger.info(`App is listening on port ${port}`);
-    });
+const server = app.listen(port, () => {
+    logger.info(`App is listening on port ${port}`);
+});
 
 const io = require('socket.io')(server);
 const users = {}; //{socketId:ip}
@@ -52,15 +47,18 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function () {
         if (users.hasOwnProperty(socket.id)) {
             delete users[socket.id];
-            console.log('remove ' + socket.id)
+            console.log('delete user: ' + socket.id);
+            console.log('user num:' , Object.keys(users).length);
         }
     })
 })
 
 function saveUser(socket) {
-    const ip = socket.handshake.address;
-    console.log('ip->' + ip);
+    const address = socket.handshake.address;
+    const ip = address.replace('::ffff:', '');
     users[socket.id] = ip;
+    console.log('save user:' , socket.id, ip);
+    console.log('user num:' , Object.keys(users).length);
 }
 
 setAppiumSender(
@@ -82,8 +80,9 @@ setAppiumSender(
                 io.emit('appium-kill-session');
                 break;
             case 'session_invalid':
-                if (io.sockets.connected[args]) {
-                    io.sockets.connected[args].emit('appium-session-invalid');
+                const socketId = args;
+                if (io.sockets.connected[socketId]) {
+                    io.sockets.connected[socketId].emit('appium-session-invalid');
                 }
                 break;
         }
@@ -172,8 +171,9 @@ router.route('/log').get(async (req, res) => {
 });
 
 router.route('/source').get(async (req, res) => {
-    const source = await readAppSource();
-    if(source) {
+    const sessionId =  req.query.sessionId;
+    const source = await readAppSource(sessionId);
+    if (source) {
         res.status(200).json({
             code: 200,
             msg: 'read app source.',
@@ -188,7 +188,8 @@ router.route('/source').get(async (req, res) => {
 });
 
 router.route('/screenshot').get(async (req, res) => {
-    const screenshot = await takeAppScreenshot();
+    const sessionId =  req.query.sessionId;
+    const screenshot = await takeAppScreenshot(sessionId);
     if (screenshot) {
         res.status(200).json({
             code: 200,
@@ -199,6 +200,23 @@ router.route('/screenshot').get(async (req, res) => {
         res.status(500).json({
             code: 500,
             msg: 'take app screenshot error.'
+        })
+    }
+});
+
+router.route('/windowSize').get(async (req, res) => {
+    const sessionId =  req.query.sessionId;
+    const size = await windowSize(sessionId);
+    if (size) {
+        res.status(200).json({
+            code: 200,
+            msg: 'get window size.',
+            data: size
+        })
+    } else {
+        res.status(500).json({
+            code: 500,
+            msg: 'get window size.'
         })
     }
 });

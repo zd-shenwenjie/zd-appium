@@ -4,6 +4,8 @@ const appium = require('appium');
 const { fs, tempDir } = require('appium-support');
 const { getDefaultArgs } = require('appium/build/lib/parser');
 const { logger } = require('../logger');
+const { DOMParser } = require('xmldom');
+const XPath = require('xpath');
 const AppiumHandler = require('./handler')
 
 const LOG_SEND_INTERVAL_MS = 250;
@@ -154,20 +156,110 @@ async function readLogFile() {
     return log;
 }
 
-async function readAppSource() {
-    let source;
-    if (appiumHandler) {
-        source = appiumHandler.source();
+async function readAppSource(sessionId) {
+    let sourceObject = {};
+    if (appiumHandler && checkSession(sessionId)) {
+        try {
+            const source = await appiumHandler.source();
+            logger.warn('@@@@@@@', typeof source, source);
+            if (source) {
+                sourceObject = XML2JSON(source);
+            }
+        } catch (error) {
+            logger.error(error.message);
+        }
     }
-    return source;
+    return sourceObject;
 }
 
-async function takeAppScreenshot() {
+function XML2JSON(source) {
+    const doc = (new DOMParser()).parseFromString(source, 'application/xml');
+    const parseAttributes = function (attributes) {
+        const attrObject = {};
+        for (let i = 0; i < attributes.length; i++) {
+            const attribute = attributes[i];
+            if (attribute.nodeType == 2) {
+                attrObject[attribute.nodeName] = attribute.nodeValue;
+            }
+        }
+        return attrObject;
+    }
+    const parseXPath = function (doc, domNode) {
+        let xpath = '';
+        try {
+            if (domNode.nodeType == 1) {
+                // const uniqueAttributes = [
+                //   'resource-id',
+                //   'content-desc'
+                // ]; 
+                // for (let attrName of uniqueAttributes) {
+                //   const attrValue = domNode.getAttribute(attrName);
+                //   // console.log(attrName, '=', attrValue);
+                //   if (attrValue) {
+                //     xpath = `//${domNode.nodeName || '*'}[@${attrName}="${attrValue}"]`;
+                //     let othersWithAttr;
+                //     try {
+                //       othersWithAttr = XPath.select(xpath, doc);
+                //     } catch (err) {
+                //       console.error('xpath select errp.');
+                //       continue;
+                //     }
+                //     if (othersWithAttr.length > 1) {
+                //       let index = othersWithAttr.indexOf(domNode);
+                //       xpath = `(${xpath})[${index + 1}]`;
+                //     }
+                //     return xpath;
+                //   }
+                // }
+                xpath = `/${domNode.tagName}`;
+                if (domNode.parentNode) {
+                    const childNodes = Array.prototype.slice.call(domNode.parentNode.childNodes, 0).filter((childNode) => (
+                        childNode.nodeType === 1 && childNode.tagName === domNode.tagName
+                    ));
+                    if (childNodes.length > 1) {
+                        let index = childNodes.indexOf(domNode);
+                        xpath += `[${index + 1}]`;
+                    }
+                }
+                xpath = parseXPath(doc, domNode.parentNode) + xpath;
+                return xpath;
+            }
+        } catch (error) {
+            console.log('parse xpath err.')
+        }
+        return xpath;
+    }
+    const parseChildNodes = function (childNodes) {
+        const eleObject = {};
+        for (let i = 0; i < childNodes.length; i++) {
+            const childNode = childNodes[i];
+            if (childNode.nodeType == 1) {
+                eleObject[childNode.tagName] = {
+                    attributes: parseAttributes(childNode.attributes),
+                    children: parseChildNodes(childNode.childNodes),
+                    xpath: parseXPath(doc, childNode)
+                }
+            }
+        }
+        return eleObject;
+    }
+    return parseChildNodes(doc.childNodes);
+}
+
+async function takeAppScreenshot(sessionId) {
     let screenshot;
-    if (appiumHandler) {
-        screenshot = appiumHandler.takeScreenshot();
+    if (appiumHandler && checkSession(sessionId)) {
+        screenshot = await appiumHandler.takeScreenshot();
     }
     return screenshot;
+}
+
+async function windowSize(sessionId) {
+    let size;
+    if (appiumHandler && checkSession(sessionId)) {
+        size = await appiumHandler.windowSize();
+    }
+    return size;
 }
 
 module.exports = {
@@ -180,5 +272,6 @@ module.exports = {
     connectKeepAlive,
     setAppiumSender,
     readAppSource,
-    takeAppScreenshot
+    takeAppScreenshot,
+    windowSize
 };

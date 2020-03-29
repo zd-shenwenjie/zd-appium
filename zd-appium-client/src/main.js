@@ -5,7 +5,8 @@ import Screen from './view/screen';
 import Editor from './view/editor';
 import Elements from './view/elements';
 import {
-    keepAlive,
+    connection,
+    runKeepAlive,
     killKeepAlive,
     addSessionListener
 } from './http/api';
@@ -14,24 +15,21 @@ class Main extends Component {
 
     constructor(props) {
         super(props);
-        // console.log( this.props.location.state);
+        this.sessionId = window.localStorage.getItem('sessionId');
+        console.log('Main received sessionId =', this.sessionId)
     }
 
     componentDidMount() {
-        this.sessionId = window.localStorage.getItem('sessionId');
         if (this.sessionId) {
-            keepAlive(this.sessionId);
             addSessionListener(function (status) {
-                if (status == 'invalid') {
+                if (status == 'invalid' || status == 'kill') {
                     killKeepAlive();
-                    console.log('Appium Session is Invalid.')
-                    message.warn('Appium Session is Invalid.')
-                } else if (status == 'kill') {
-                    killKeepAlive();
-                    console.log('Appium Session is killed.')
-                    message.warn('Appium Session killed.')
+                    console.log(`appium Session is ${status}.`)
+                    message.warn(`appium Session is ${status}.`)
                 }
             });
+            connection();
+            runKeepAlive(this.sessionId);
         }
     }
 
@@ -40,8 +38,8 @@ class Main extends Component {
             <div >
                 <div style={{ width: '1900px', display: 'flex' }}>
                     <div style={{ width: '50%' }}>
-                        <Screen />
-                        <Elements />
+                        <Screen sessionId={this.sessionId} />
+                        <Elements sessionId={this.sessionId} />
                     </div>
                     <div style={{ width: '50%' }}>
                         <Editor />
@@ -50,6 +48,8 @@ class Main extends Component {
             </div>
         );
     }
+
+
 }
 
 export default Main;

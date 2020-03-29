@@ -83,6 +83,11 @@ class AppiumHandler {
         return screenshot;
     }
 
+    async windowSize() {
+        const size = await this.driver.getWindowSize();
+        return size
+    }
+
 }
 
 module.exports = AppiumHandler

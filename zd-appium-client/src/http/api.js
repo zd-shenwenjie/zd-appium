@@ -1,12 +1,10 @@
 import SocketClient from 'socket.io-client';
 import axios from 'axios';
 
-// const URL_SERVER_BASE = 'http://localhost:7000/api';
-// const URL_APPIUM_SERVER = URL_SERVER_BASE + '/appium'
-// const URL_ANDROID_SERVER = URL_SERVER_BASE + '/android';
-const URL_APPIUM_SERVER = 'http://192.168.3.82:7001';
-const URL_ANDROID_SERVER = 'http://192.168.3.82:7004';
-const appiumClient = new SocketClient('http://192.168.3.82:7001');
+const SERVER_IP = '192.168.0.184';
+
+const URL_APPIUM_SERVER = `http://${SERVER_IP}:7001`;
+const URL_ANDROID_SERVER = `http://${SERVER_IP}:7004`;
 
 const URL_APPIUM_STATUS = URL_APPIUM_SERVER + '/appiumServerStatus';
 const URL_APPIUM_START = URL_APPIUM_SERVER + '/connectStartServer';
@@ -16,6 +14,7 @@ const URL_APPIUM_CREATE_SESSION = URL_APPIUM_SERVER + '/createSession';
 const URL_APPIUM_KILL_SESSION = URL_APPIUM_SERVER + '/killSession';
 const URL_APPIUM_SOURCE = URL_APPIUM_SERVER + '/source';
 const URL_APPIUM_SCREENSHOT = URL_APPIUM_SERVER + '/screenshot';
+const URL_APPIUM_WINDOW = URL_APPIUM_SERVER + '/windowSize';
 
 const URL_ANDROID_DEVICE = URL_ANDROID_SERVER + '/devcies';
 const URL_ANDROID_PLATFORM = URL_ANDROID_SERVER + '/platform';
@@ -23,63 +22,92 @@ const URL_ANDROID_MODEL = URL_ANDROID_SERVER + '/model';
 const URL_ANDROID_PACKAGE = URL_ANDROID_SERVER + '/packages';
 const URL_ANDROID_ACTIVITY = URL_ANDROID_SERVER + '/activity';
 
+let appiumClient = null;
+const appiumClientListeners = [];
+const appiumLogListeners = [];
+const appiumSessionListeners = [];
+const appiumServerListeners = [];
 
-let appiumLogListeners = [];
-let appiumSessionListeners = [];
-let appiumServerListeners = [];
-let socketId = null;
-appiumClient.on('appium-connection-user', (id) => {
-    socketId = id;
-    console.log('socketId->' + id)
-})
-
-appiumClient.on('appium-start-server', () => {
-    for (const appiumServerListener of appiumServerListeners) {
-        if (typeof appiumServerListener == 'function') {
-            appiumServerListener('start');
+export function connection() {
+    appiumClient = new SocketClient(URL_APPIUM_SERVER);
+    appiumClient.on('connect_error', (error) => {
+        for (const appiumClientListener of appiumClientListeners) {
+            if (typeof appiumClientListener == 'function') {
+                appiumClientListener('error', error);
+            }
         }
-    }
-})
+    });
 
-appiumClient.on('appium-stop-server', () => {
-    for (const appiumServerListener of appiumServerListeners) {
-        if (typeof appiumServerListener == 'function') {
-            appiumServerListener('stop');
+    appiumClient.on('connect_timeout', (timeout) => {
+        for (const appiumClientListener of appiumClientListeners) {
+            if (typeof appiumClientListener == 'function') {
+                appiumClientListener('timeout', timeout);
+            }
         }
-    }
-})
+    });
 
-appiumClient.on('appium-new-session', (owner) => {
-    for (const appiumSessionListener of appiumSessionListeners) {
-        if (typeof appiumSessionListener == 'function') {
-            appiumSessionListener('new', owner);
+    appiumClient.on('appium-connection-user', (id) => {
+        for (const appiumClientListener of appiumClientListeners) {
+            if (typeof appiumClientListener == 'function') {
+                appiumClientListener('uid', id);
+            }
         }
-    }
-})
+    })
 
-appiumClient.on('appium-kill-session', () => {
-    for (const appiumSessionListener of appiumSessionListeners) {
-        if (typeof appiumSessionListener == 'function') {
-            appiumSessionListener('kill');
+    appiumClient.on('appium-start-server', () => {
+        for (const appiumServerListener of appiumServerListeners) {
+            if (typeof appiumServerListener == 'function') {
+                appiumServerListener('start');
+            }
         }
-    }
-})
+    })
 
-appiumClient.on('appium-session-invalid', () => {
-    for (const appiumSessionListener of appiumSessionListeners) {
-        if (typeof appiumSessionListener == 'function') {
-            appiumSessionListener('invalid');
+    appiumClient.on('appium-stop-server', () => {
+        for (const appiumServerListener of appiumServerListeners) {
+            if (typeof appiumServerListener == 'function') {
+                appiumServerListener('stop');
+            }
         }
-    }
-})
+    })
 
-appiumClient.on('appium-log-line', (batchedLogs) => {
-    for (const appiumLogListener of appiumLogListeners) {
-        if (typeof appiumLogListener == 'function') {
-            appiumLogListener(batchedLogs);
+    appiumClient.on('appium-new-session', (owner) => {
+        for (const appiumSessionListener of appiumSessionListeners) {
+            if (typeof appiumSessionListener == 'function') {
+                appiumSessionListener('new', owner);
+            }
         }
+    })
+
+    appiumClient.on('appium-kill-session', () => {
+        for (const appiumSessionListener of appiumSessionListeners) {
+            if (typeof appiumSessionListener == 'function') {
+                appiumSessionListener('kill');
+            }
+        }
+    })
+
+    appiumClient.on('appium-session-invalid', () => {
+        for (const appiumSessionListener of appiumSessionListeners) {
+            if (typeof appiumSessionListener == 'function') {
+                appiumSessionListener('invalid');
+            }
+        }
+    })
+
+    appiumClient.on('appium-log-line', (batchedLogs) => {
+        for (const appiumLogListener of appiumLogListeners) {
+            if (typeof appiumLogListener == 'function') {
+                appiumLogListener(batchedLogs);
+            }
+        }
+    })
+}
+
+export function addAppiumClientListener(listener) {
+    if (typeof listener == 'function') {
+        appiumClientListeners.push(listener);
     }
-})
+}
 
 export function addAppiumLogListener(listener) {
     if (typeof listener == 'function') {
@@ -105,15 +133,15 @@ export function startAppiumServer() {
     return axios.post(URL_APPIUM_START);
 }
 
-export function keepAlive(sessionId) {
-    keepAliveHandler = setInterval(() => {
-        if (sessionId) {
+export function runKeepAlive(sessionId) {
+    if (appiumClient && sessionId) {
+        keepAliveHandler = setInterval(() => {
             appiumClient.emit('appium-session-alive', sessionId);
-        }
-    }, KEEP_SESSIOND_ALIVE);
+        }, KEEP_SESSIOND_ALIVE);
+    }
 }
 
-export function killKeepAlive(sessionId) {
+export function killKeepAlive() {
     if (keepAliveHandler) {
         clearInterval(keepAliveHandler);
         keepAliveHandler = null;
@@ -156,13 +184,13 @@ export function getAppiumLog() {
     return axios.get(URL_APPIUM_LOG);
 }
 
-export function createSession(model, platform, pkg, activity) {
+export function createSession(model, platform, pkg, activity, userId) {
     return axios.post(URL_APPIUM_CREATE_SESSION, {
         model,
         platform,
         pkg,
         activity,
-        userId: socketId
+        userId
     });
 }
 
@@ -170,10 +198,20 @@ export function killSession() {
     return axios.post(URL_APPIUM_KILL_SESSION);
 }
 
-export function readAppSource() {
-    return axios.get(URL_APPIUM_SOURCE);
+export function readAppSource(sessionId) {
+    return axios.get(URL_APPIUM_SOURCE, {
+        params: { sessionId }
+    });
 }
 
-export function takeAppScreenshot() {
-    return axios.get(URL_APPIUM_SCREENSHOT);
+export function takeAppScreenshot(sessionId) {
+    return axios.get(URL_APPIUM_SCREENSHOT, {
+        params: { sessionId }
+    });
+}
+
+export function windowSize(sessionId) {
+    return axios.get(URL_APPIUM_WINDOW, {
+        params: { sessionId }
+    });
 }
