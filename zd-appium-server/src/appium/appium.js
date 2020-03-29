@@ -161,7 +161,6 @@ async function readAppSource(sessionId) {
     if (appiumHandler && checkSession(sessionId)) {
         try {
             const source = await appiumHandler.source();
-            logger.warn('@@@@@@@', typeof source, source);
             if (source) {
                 sourceObject = XML2JSON(source);
             }
@@ -262,6 +261,22 @@ async function windowSize(sessionId) {
     return size;
 }
 
+async function tap(sessionId, x, y) {
+    if (appiumHandler && checkSession(sessionId)) {
+        await appiumHandler.tap(x, y);
+        return true;
+    }
+    return false;
+}
+
+async function swipe(sessionId, from, to) {
+    if (appiumHandler && checkSession(sessionId)) {
+       await appiumHandler.swipe(from, to);
+       return true;
+    }
+    return false;
+}
+
 module.exports = {
     readLogFile,
     createSession,
@@ -273,5 +288,7 @@ module.exports = {
     setAppiumSender,
     readAppSource,
     takeAppScreenshot,
-    windowSize
+    windowSize,
+    tap,
+    swipe
 };

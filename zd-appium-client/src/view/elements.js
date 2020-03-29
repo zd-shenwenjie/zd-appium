@@ -109,7 +109,7 @@ class Elements extends Component {
                         elements
                     })
                     // console.log('attributes:', JSON.stringify(this.elementAttributes));
-                    console.log(JSON.stringify(source));
+                    // console.log(JSON.stringify(source));
                 }
             }).catch(error => {
                 message.error('read app source error:' + error.message);

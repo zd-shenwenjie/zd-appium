@@ -9,7 +9,9 @@ const {
     connectKeepAlive,
     readAppSource,
     takeAppScreenshot,
-    windowSize
+    windowSize,
+    tap,
+    swipe
 } = require('./appium');
 
 const { logger } = require('../logger');
@@ -48,7 +50,7 @@ io.on('connection', function (socket) {
         if (users.hasOwnProperty(socket.id)) {
             delete users[socket.id];
             console.log('delete user: ' + socket.id);
-            console.log('user num:' , Object.keys(users).length);
+            console.log('user num:', Object.keys(users).length);
         }
     })
 })
@@ -57,8 +59,8 @@ function saveUser(socket) {
     const address = socket.handshake.address;
     const ip = address.replace('::ffff:', '');
     users[socket.id] = ip;
-    console.log('save user:' , socket.id, ip);
-    console.log('user num:' , Object.keys(users).length);
+    console.log('save user:', socket.id, ip);
+    console.log('user num:', Object.keys(users).length);
 }
 
 setAppiumSender(
@@ -171,7 +173,7 @@ router.route('/log').get(async (req, res) => {
 });
 
 router.route('/source').get(async (req, res) => {
-    const sessionId =  req.query.sessionId;
+    const sessionId = req.query.sessionId;
     const source = await readAppSource(sessionId);
     if (source) {
         res.status(200).json({
@@ -188,7 +190,7 @@ router.route('/source').get(async (req, res) => {
 });
 
 router.route('/screenshot').get(async (req, res) => {
-    const sessionId =  req.query.sessionId;
+    const sessionId = req.query.sessionId;
     const screenshot = await takeAppScreenshot(sessionId);
     if (screenshot) {
         res.status(200).json({
@@ -205,7 +207,7 @@ router.route('/screenshot').get(async (req, res) => {
 });
 
 router.route('/windowSize').get(async (req, res) => {
-    const sessionId =  req.query.sessionId;
+    const sessionId = req.query.sessionId;
     const size = await windowSize(sessionId);
     if (size) {
         res.status(200).json({
@@ -217,6 +219,58 @@ router.route('/windowSize').get(async (req, res) => {
         res.status(500).json({
             code: 500,
             msg: 'get window size.'
+        })
+    }
+});
+
+router.route('/tap').post(async (req, res) => {
+    const { sessionId, x, y } = req.body;
+    if (sessionId && x && y) {
+        const result = await tap(sessionId, x, y);
+        if (result) {
+            res.status(200).json({
+                code: 200,
+                msg: `tap ${x},${y}`,
+                data: result
+            })
+        } else {
+            res.status(500).json({
+                code: 500,
+                msg: `tap error `,
+                data: result
+            })
+        }
+    } else {
+        res.status(400).json({
+            code: 500,
+            msg: 'tap args error.'
+        })
+    }
+});
+
+router.route('/swipe').post(async (req, res) => {
+    const { sessionId, from, to } = req.body;
+    if (sessionId &&
+        from && from.hasOwnProperty('x') && from.hasOwnProperty('y') &&
+        to && to.hasOwnProperty('x') && to.hasOwnProperty('y')) {
+        const result = await swipe(sessionId, from, to);
+        if (result) {
+            res.status(200).json({
+                code: 200,
+                msg: `swipe ${JSON.stringify(from)} , ${JSON.stringify(to)}`,
+                data: result
+            })
+        } else {
+            res.status(500).json({
+                code: 500,
+                msg: `swipe ${JSON.stringify(from)} , ${JSON.stringify(to)}`,
+                data: result
+            })
+        }
+    } else {
+        res.status(400).json({
+            code: 500,
+            msg: 'swipe args erro.'
         })
     }
 });

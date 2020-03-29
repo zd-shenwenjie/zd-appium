@@ -73,12 +73,12 @@ class AppiumHandler {
         }
     }
 
-    async source(){
+    async source() {
         const source = await this.driver.source();
         return source;
-    } 
+    }
 
-    async takeScreenshot(){
+    async takeScreenshot() {
         const screenshot = await this.driver.takeScreenshot();
         return screenshot;
     }
@@ -86,6 +86,21 @@ class AppiumHandler {
     async windowSize() {
         const size = await this.driver.getWindowSize();
         return size
+    }
+
+    async tap(x, y) {
+        await (new wd.TouchAction(this.driver))
+            .tap({ x, y })
+            .perform();
+    }
+
+    async swipe(from, to) {
+        await (new wd.TouchAction(this.driver))
+            .press({ x: from.x, y: from.y })
+            .wait(500)
+            .moveTo({ x: to.x, y: to.y })
+            .release()
+            .perform();
     }
 
 }

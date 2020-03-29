@@ -15,6 +15,8 @@ const URL_APPIUM_KILL_SESSION = URL_APPIUM_SERVER + '/killSession';
 const URL_APPIUM_SOURCE = URL_APPIUM_SERVER + '/source';
 const URL_APPIUM_SCREENSHOT = URL_APPIUM_SERVER + '/screenshot';
 const URL_APPIUM_WINDOW = URL_APPIUM_SERVER + '/windowSize';
+const URL_APPIUM_TAP =  URL_APPIUM_SERVER + '/tap';
+const URL_APPIUM_SWIPE =  URL_APPIUM_SERVER + '/swipe';
 
 const URL_ANDROID_DEVICE = URL_ANDROID_SERVER + '/devcies';
 const URL_ANDROID_PLATFORM = URL_ANDROID_SERVER + '/platform';
@@ -213,5 +215,17 @@ export function takeAppScreenshot(sessionId) {
 export function windowSize(sessionId) {
     return axios.get(URL_APPIUM_WINDOW, {
         params: { sessionId }
+    });
+}
+
+export function tap(sessionId, x, y) {
+    return axios.post(URL_APPIUM_TAP, {
+        sessionId, x, y
+    });
+}
+
+export function swipe(sessionId, from, to) {
+    return axios.post(URL_APPIUM_SWIPE, {
+        sessionId, from, to
     });
 }

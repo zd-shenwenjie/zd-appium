@@ -20,11 +20,9 @@ app.listen(port, () => {
 });
 
 router.route('/script').post((req, res) => {
-    const address = req.body.address; // user: ip
-    const config = req.body.config; // package: activity
-    const script = req.body.script; // find view -> click -> ...
+    const script = req.body.script; 
     if (address && config && script) {
-        const id = AppiumManager.getInstance().enqueue({ address, config, script });
+        const id = AppiumManager.getInstance().enqueue({ script });
         if (id > 0) {
             res.status(200).json({
                 code: 200,
