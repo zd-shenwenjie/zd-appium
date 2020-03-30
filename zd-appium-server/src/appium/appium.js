@@ -37,13 +37,13 @@ async function createSession(cfg, caps, owner) {
     return sessionId;
 }
 
-async function killSession() {
+async function killSession(killer = { ip: '127.0.0.1' }) {
     if (appiumHandler) {
         await appiumHandler.close();
         appiumHandler = null;
         appiumOwner = null;
         if (typeof appiumSender == 'function') {
-            appiumSender('kill_session');
+            appiumSender('kill_session', killer);
         }
     }
 }
@@ -51,7 +51,9 @@ async function killSession() {
 const appiumHandlerListener = function (status) {
     if (status == 'invalid' || status == 'error') {
         killSession();
-        appiumSender('session_invalid', appiumOwner.socketId);
+        if(appiumOwner && appiumOwner.hasOwnProperty('socketId')) {
+            appiumSender('session_invalid', appiumOwner.socketId);
+        }
     }
 }
 
@@ -130,8 +132,8 @@ function appiumServerStatus() {
     let owner = {};
     if (appiumOwner) {
         owner = {
-            ip: appiumOwner.ip,
-            socketId: appiumOwner.socketId
+            ip: appiumOwner.ip
+            // socketId: appiumOwner.socketId
         }
     }
     return {
@@ -187,29 +189,29 @@ function XML2JSON(source) {
         let xpath = '';
         try {
             if (domNode.nodeType == 1) {
-                // const uniqueAttributes = [
-                //   'resource-id',
-                //   'content-desc'
-                // ]; 
-                // for (let attrName of uniqueAttributes) {
-                //   const attrValue = domNode.getAttribute(attrName);
-                //   // console.log(attrName, '=', attrValue);
-                //   if (attrValue) {
-                //     xpath = `//${domNode.nodeName || '*'}[@${attrName}="${attrValue}"]`;
-                //     let othersWithAttr;
-                //     try {
-                //       othersWithAttr = XPath.select(xpath, doc);
-                //     } catch (err) {
-                //       console.error('xpath select errp.');
-                //       continue;
-                //     }
-                //     if (othersWithAttr.length > 1) {
-                //       let index = othersWithAttr.indexOf(domNode);
-                //       xpath = `(${xpath})[${index + 1}]`;
-                //     }
-                //     return xpath;
-                //   }
-                // }
+                const uniqueAttributes = [
+                    'resource-id',
+                    'content-desc'
+                ];
+                for (let attrName of uniqueAttributes) {
+                    const attrValue = domNode.getAttribute(attrName);
+                    // console.log(attrName, '=', attrValue);
+                    if (attrValue) {
+                        xpath = `//${domNode.nodeName || '*'}[@${attrName}="${attrValue}"]`;
+                        let othersWithAttr;
+                        try {
+                            othersWithAttr = XPath.select(xpath, doc);
+                        } catch (err) {
+                            console.error('xpath select errp.');
+                            continue;
+                        }
+                        if (othersWithAttr.length > 1) {
+                            let index = othersWithAttr.indexOf(domNode);
+                            xpath = `(${xpath})[${index + 1}]`;
+                        }
+                        return xpath;
+                    }
+                }
                 xpath = `/${domNode.tagName}`;
                 if (domNode.parentNode) {
                     const childNodes = Array.prototype.slice.call(domNode.parentNode.childNodes, 0).filter((childNode) => (
@@ -271,8 +273,8 @@ async function tap(sessionId, x, y) {
 
 async function swipe(sessionId, from, to) {
     if (appiumHandler && checkSession(sessionId)) {
-       await appiumHandler.swipe(from, to);
-       return true;
+        await appiumHandler.swipe(from, to);
+        return true;
     }
     return false;
 }

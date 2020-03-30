@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const {logger} = require('../logger');
+const { logger } = require('../logger');
 const Looper = require('./looper');
 
 const app = express();
@@ -20,19 +20,19 @@ app.listen(port, () => {
 });
 
 router.route('/script').post((req, res) => {
-    const script = req.body.script; 
-    if (address && config && script) {
-        const id = AppiumManager.getInstance().enqueue({ script });
-        if (id > 0) {
+    const script = req.body.script;
+    if (script) {
+        const id = Looper.getInstance().enqueue(script);
+        if (id) {
             res.status(200).json({
                 code: 200,
                 msg: 'The script has entered the queue.',
                 data: id
             });
         } else {
-            res.status(500).json({
-                code: 500,
-                msg: 'Entry queue error.'
+            res.status(400).json({
+                code: 400,
+                msg: 'The script entered the queue error.',
             });
         }
     } else {

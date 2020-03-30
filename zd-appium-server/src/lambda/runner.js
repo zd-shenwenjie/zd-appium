@@ -1,24 +1,16 @@
 var vm = require('vm');
-const api = require('../appium/zdapi')
+const api = require('./zdapi')
 
-class AppiumClient {
-    /**
-     * {
-     *  address: shenwenjie:127.0.0.1,
-     *  config: {platformName: 'Android', automationName: 'UiAutomator2', deviceName: 'Android Emulator', platformVersion: '8.1' }
-     * } 
-     */
-    constructor({ address, config }) {
-        // console.log(`address = ${address}`);
-        // console.log(`config = ${config}`)
+class Runner {
+
+    constructor(scriptId) {
+        this.scriptId = scriptId;
     }
 
     async run(script) {
         script = `
             async function run() {
-                await init();
                 ${script}
-                await exit();
             }
             
             run().catch(e => {
@@ -32,6 +24,6 @@ class AppiumClient {
 
 
 
-module.exports = AppiumClient;
+module.exports = Runner;
 
 

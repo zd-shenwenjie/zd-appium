@@ -7,6 +7,7 @@ import {
 class Elements extends Component {
     constructor(props) {
         super(props);
+        this.sessionId='';
         this.elementAttributes = {};
         this.state = {
             elements: [],
@@ -16,22 +17,22 @@ class Elements extends Component {
     }
 
     componentDidMount() {
-        this.handleReadAppSource();      
+        this.props.onRef(this);     
     }
 
     render() {
         return (
             <div >
-                <div style={{ width: '100%', height: "40px", background: 'lightgray' }}>
+                <div style={{ width: '800px', height: "40px" }}>
                     <Button
-                        style={{ width: '20%', height: '30px', margin: '5px', float: 'right' }}
+                        style={{ width: '150px', height: '30px', margin: '5px', float: 'right' }}
                         onClick={this.handleReadAppSource.bind(this)}
                     >
                         App Crawler
                     </Button>
                 </div >
 
-                <div style={{ width: '100%', height: "500px", display: 'flex' }}>
+                <div style={{ width: '800px', height: "500px", display: 'flex' }}>
                     <div style={{ width: '60%', height: '100%' }} >
                         <Tree
                             height={500}
@@ -58,6 +59,11 @@ class Elements extends Component {
         )
     }
 
+    handleUpdateView(sessionId) {
+        this.sessionId = sessionId;
+        this.handleReadAppSource();
+    }
+
     handleSelectElement(selectedKeys) {
         const selectedKey = selectedKeys[0];
         // console.log('key:' + selectedKey);
@@ -77,8 +83,8 @@ class Elements extends Component {
     }
 
     handleReadAppSource() {
-        if (this.props.sessionId) {
-            readAppSource(this.props.sessionId).then(res => {
+        if (this.sessionId) {
+            readAppSource(this.sessionId).then(res => {
                 const result = res.data;
                 const source = result.data;
                 if (source) {

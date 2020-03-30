@@ -4,6 +4,7 @@ import axios from 'axios';
 const SERVER_IP = '192.168.0.184';
 
 const URL_APPIUM_SERVER = `http://${SERVER_IP}:7001`;
+const URL_LAMBDA_SERVER = `http://${SERVER_IP}:7002`;
 const URL_ANDROID_SERVER = `http://${SERVER_IP}:7004`;
 
 const URL_APPIUM_STATUS = URL_APPIUM_SERVER + '/appiumServerStatus';
@@ -15,14 +16,16 @@ const URL_APPIUM_KILL_SESSION = URL_APPIUM_SERVER + '/killSession';
 const URL_APPIUM_SOURCE = URL_APPIUM_SERVER + '/source';
 const URL_APPIUM_SCREENSHOT = URL_APPIUM_SERVER + '/screenshot';
 const URL_APPIUM_WINDOW = URL_APPIUM_SERVER + '/windowSize';
-const URL_APPIUM_TAP =  URL_APPIUM_SERVER + '/tap';
-const URL_APPIUM_SWIPE =  URL_APPIUM_SERVER + '/swipe';
+const URL_APPIUM_TAP = URL_APPIUM_SERVER + '/tap';
+const URL_APPIUM_SWIPE = URL_APPIUM_SERVER + '/swipe';
 
 const URL_ANDROID_DEVICE = URL_ANDROID_SERVER + '/devcies';
 const URL_ANDROID_PLATFORM = URL_ANDROID_SERVER + '/platform';
 const URL_ANDROID_MODEL = URL_ANDROID_SERVER + '/model';
 const URL_ANDROID_PACKAGE = URL_ANDROID_SERVER + '/packages';
 const URL_ANDROID_ACTIVITY = URL_ANDROID_SERVER + '/activity';
+
+const URL_LAMBDA_SCRIPT = URL_LAMBDA_SERVER + '/script';
 
 let appiumClient = null;
 const appiumClientListeners = [];
@@ -44,6 +47,14 @@ export function connection() {
         for (const appiumClientListener of appiumClientListeners) {
             if (typeof appiumClientListener == 'function') {
                 appiumClientListener('timeout', timeout);
+            }
+        }
+    });
+
+    appiumClient.on('reconnect', (attemptNumber) => {
+        for (const appiumClientListener of appiumClientListeners) {
+            if (typeof appiumClientListener == 'function') {
+                appiumClientListener('reconnect', attemptNumber);
             }
         }
     });
@@ -80,10 +91,10 @@ export function connection() {
         }
     })
 
-    appiumClient.on('appium-kill-session', () => {
+    appiumClient.on('appium-kill-session', (killer) => {
         for (const appiumSessionListener of appiumSessionListeners) {
             if (typeof appiumSessionListener == 'function') {
-                appiumSessionListener('kill');
+                appiumSessionListener('kill', killer);
             }
         }
     })
@@ -137,8 +148,13 @@ export function startAppiumServer() {
 
 export function runKeepAlive(sessionId) {
     if (appiumClient && sessionId) {
+        if (keepAliveHandler) {
+            killKeepAlive();
+            console.log('keep alive loop  is already running');
+        }
         keepAliveHandler = setInterval(() => {
             appiumClient.emit('appium-session-alive', sessionId);
+            console.log(`start keep ${sessionId} alive.`);
         }, KEEP_SESSIOND_ALIVE);
     }
 }
@@ -147,6 +163,7 @@ export function killKeepAlive() {
     if (keepAliveHandler) {
         clearInterval(keepAliveHandler);
         keepAliveHandler = null;
+        console.log(`kill keep alive loop.`);
     }
 }
 
@@ -196,8 +213,10 @@ export function createSession(model, platform, pkg, activity, userId) {
     });
 }
 
-export function killSession() {
-    return axios.post(URL_APPIUM_KILL_SESSION);
+export function killSession(userId) {
+    return axios.post(URL_APPIUM_KILL_SESSION, {
+        userId
+    });
 }
 
 export function readAppSource(sessionId) {
@@ -227,5 +246,11 @@ export function tap(sessionId, x, y) {
 export function swipe(sessionId, from, to) {
     return axios.post(URL_APPIUM_SWIPE, {
         sessionId, from, to
+    });
+}
+
+export function runScript(script) {
+    return axios.post(URL_LAMBDA_SCRIPT, {
+        script
     });
 }

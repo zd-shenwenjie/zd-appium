@@ -1,27 +1,26 @@
-const AppiumClient = require('./runner');
+const Runner = require('./runner');
 const crypto = require("crypto");
 
 class Looper {
 
     constructor() {
-        //[{id, script}, ...]
-        this.queue = [];
+        this.queue = []; //[{id, script}, ...]
         this.isExecuting = false;
     }
 
     static getInstance() {
         if (!this.instance) {
-            this.instance = new AppiumManager();
+            this.instance = new Looper();
         }
         return this.instance;
     }
 
-    enqueue({ address, config, script }) {
+    enqueue(script) {
         const scriptId = crypto.randomBytes(16).toString("hex").substr(0, 6);
-        this.queue.push({ scriptId, address, config, script });
+        this.queue.push({ scriptId, script });
         console.log(`The scriptId = ${scriptId} has entered the queue.`);
         if (!this.isExecuting) {
-            this.execute({ scriptId, address, config, script });
+            this.execute(this.queue[0]);
         }
         return scriptId;
     }
@@ -31,9 +30,9 @@ class Looper {
         console.log(`The scriptId = ${scriptId} has removed the queue.`);
     }
 
-    async execute({ scriptId, address, config, script }) {
+    async execute({ scriptId, script }) {
         this.isExecuting = true;
-        const client = new AppiumClient({ address, config });
+        const client = new Runner(scriptId);
         await client.run(script);
         this.isExecuting = false;
         this.dequeue();

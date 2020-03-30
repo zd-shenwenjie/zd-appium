@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import 'antd/dist/antd.css';
 import MonacoEditor from 'react-monaco-editor';
+import { runScript } from '../http/api';
 
 class Editor extends Component {
 
@@ -15,14 +16,14 @@ class Editor extends Component {
     render() {
         return (
             <div >
-                <div style={{ width: '100%', height: '40px', background: 'lightgray' }}>
+                <div style={{ width: '800px', height: '40px' }}>
                     <Button
-                        style={{ width: '20%', height: '30px', margin:'5px', float: 'right' }}
+                        style={{ width: '150px', height: '30px', margin: '5px', float: 'right' }}
                         onClick={this.handleRunScript.bind(this)}>
                         Run Script
                     </Button>
                 </div>
-                <div style={{ width: '100%', height: '1040px' }} >
+                <div style={{ width: '800px', height: '500px' }} >
                     <MonacoEditor
                         style={{ width: '100%', height: '100%' }}
                         language="javascript"
@@ -43,7 +44,17 @@ class Editor extends Component {
     }
 
     handleRunScript(e) {
-        console.log('run script:', this.state.script);
+        const script = this.state.script;
+        if (script) {
+            runScript(script).then(res => {
+                const result = res.data;
+                console.log(JSON.stringify(result));
+            }).catch(error => {
+                message.error(error.message);
+            });
+        } else {
+            message.error('script is null.');
+        }
     }
 
     handleChangeScript(value, e) {

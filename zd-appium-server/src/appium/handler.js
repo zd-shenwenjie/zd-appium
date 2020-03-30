@@ -103,6 +103,13 @@ class AppiumHandler {
             .perform();
     }
 
+    async elementById(id) {
+        return await this.driver.elementById(id);
+    }
+
+    async waitForElementById(id) {
+        return await this.driver.waitForElementById(id);
+    }
 }
 
 module.exports = AppiumHandler

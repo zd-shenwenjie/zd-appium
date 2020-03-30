@@ -73,18 +73,18 @@ setAppiumSender(
                 io.emit('appium-stop-server');
                 break;
             case 'send_log':
-                io.emit('appium-log-line', args);
+                io.emit('appium-log-line', args); // args-> log message include level and msg
                 break;
             case 'new_session':
-                io.emit('appium-new-session', args);
+                io.emit('appium-new-session', args); // args-> who create the session
                 break;
             case 'kill_session':
-                io.emit('appium-kill-session');
+                io.emit('appium-kill-session', args); // args -> who kill the session
                 break;
             case 'session_invalid':
                 const socketId = args;
                 if (io.sockets.connected[socketId]) {
-                    io.sockets.connected[socketId].emit('appium-session-invalid');
+                    io.sockets.connected[socketId].emit('appium-session-invalid'); // only send the socket who created it.
                 }
                 break;
         }
@@ -147,11 +147,23 @@ router.route('/createSession').post(async (req, res) => {
 });
 
 router.route('/killSession').post(async (req, res) => {
-    await killSession();
-    res.status(200).json({
-        code: 200,
-        msg: `kill session ${sessionId}`
-    })
+    const { userId } = req.body;
+    if(userId && users.hasOwnProperty(userId)){
+        const killer = {
+            socketId: userId,
+            ip: users[userId]
+        }
+        await killSession(killer);
+        res.status(200).json({
+            code: 200,
+            msg: `kill session ${sessionId}`
+        })
+    } else {
+        res.status(400).json({
+            code: 400,
+            msg: 'kill session error'
+        })
+    }
 });
 
 router.route('/appiumServerStatus').get((req, res) => {

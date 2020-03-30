@@ -14,7 +14,7 @@ class Screen extends Component {
     constructor(props) {
         super(props);
         this.screenDiv = null;
-
+        this.sessionId = '';
         this.window_size = {}; // app window size
         this.screen_size = {}; // screen size
         this.screen_max_size = {}; // screen div size
@@ -29,27 +29,25 @@ class Screen extends Component {
     }
 
     componentDidMount() {
-        this.handleScreenMaxSize();
-        this.handleWindowSize();
-        this.handleTakeAppScreenshot();
+        this.props.onRef(this);
     }
 
     render() {
         return (
             <div>
-                <div style={{ width: '100%', height: "40px", background: 'lightgray' }}>
-                    <Radio.Group style={{ margin: '5px' }} value={this.state.touchEvent} onChange={this.handleChangeTouchEvent.bind(this)}>
-                        <Radio.Button value="tap">Tap By Coordinates</Radio.Button>
-                        <Radio.Button value="swipe">Swipe By Coordinates</Radio.Button>
+                <div style={{ width: '800px', height: "40px" }}>
+                    <Radio.Group value={this.state.touchEvent} onChange={this.handleChangeTouchEvent.bind(this)}>
+                        <Radio.Button style={{ width: '155px' }} value="tap">Tap </Radio.Button>
+                        <Radio.Button style={{ width: '155px' }} value="swipe">Swipe </Radio.Button>
                     </Radio.Group>
-                    <Button style={{ width: '20%', height: '30px', margin: '5px', float: 'right' }} onClick={this.handleTakeAppScreenshot.bind(this)}>
+                    <Button style={{ width: '150px', height: '30px', marginRight: '10px', float: 'right' }} onClick={this.handleTakeAppScreenshot.bind(this)}>
                         Screenshot
                     </Button>
-                    <Button style={{ width: '20%', height: '30px', margin: '5px', float: 'right' }} onClick={this.handleWindowSize.bind(this)}>
+                    <Button style={{ width: '150px', height: '30px', marginRight: '10px', float: 'right' }} onClick={this.handleWindowSize.bind(this)}>
                         Window Size
                     </Button>
                 </div>
-                <div style={{ width: '100%', height: '500px', background: 'gray', justifyContent: 'center', textAlign: 'center' }} ref={(screenDiv) => this.screenDiv = screenDiv}>
+                <div style={{ width: '800px', height: '500px', background: 'gray', justifyContent: 'center', textAlign: 'center' }} ref={(screenDiv) => this.screenDiv = screenDiv}>
                     <img
                         style={{ ...this.handleScreenSize() }}
                         src={this.state.screenImage ? `data:image/gif;base64,${this.state.screenImage}` : zd_image_screen}
@@ -58,6 +56,13 @@ class Screen extends Component {
                 </div>
             </div>
         )
+    }
+
+    handleUpdateView(sessionId) {
+        this.sessionId = sessionId;
+        this.handleScreenMaxSize();
+        this.handleWindowSize();
+        this.handleTakeAppScreenshot();
     }
 
     handleScaleRatio() {
@@ -119,8 +124,8 @@ class Screen extends Component {
     }
 
     handleWindowSize() {
-        if (this.props.sessionId) {
-            windowSize(this.props.sessionId).then(res => {
+        if (this.sessionId) {
+            windowSize(this.sessionId).then(res => {
                 const result = res.data;
                 const size = result.data;
                 this.window_size = size;
@@ -171,7 +176,7 @@ class Screen extends Component {
 
     handleTapEvent(x, y) {
         if (x && y) {
-            tap(this.props.sessionId, x, y).then(res => {
+            tap(this.sessionId, x, y).then(res => {
                 const result = res.data;
                 console.log(JSON.stringify(result));
             }).catch(error => {
@@ -185,7 +190,7 @@ class Screen extends Component {
 
     handleSwipeEvent(from, to) {
         if (from && from.hasOwnProperty('x') && from.hasOwnProperty('y') && to && to.hasOwnProperty('x') && to.hasOwnProperty('y')) {
-            swipe(this.props.sessionId, from, to).then(res => {
+            swipe(this.sessionId, from, to).then(res => {
                 const result = res.data;
                 console.log(JSON.stringify(result));
             }).catch(error => {
@@ -204,8 +209,8 @@ class Screen extends Component {
     }
 
     handleTakeAppScreenshot() {
-        if (this.props.sessionId) {
-            takeAppScreenshot(this.props.sessionId).then(res => {
+        if (this.sessionId) {
+            takeAppScreenshot(this.sessionId).then(res => {
                 const result = res.data;
                 const screenshot = result.data;
                 // console.log(typeof screenshot);
