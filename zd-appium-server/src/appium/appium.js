@@ -133,7 +133,6 @@ function appiumServerStatus() {
     if (appiumOwner) {
         owner = {
             ip: appiumOwner.ip
-            // socketId: appiumOwner.socketId
         }
     }
     return {
@@ -279,48 +278,116 @@ async function swipe(sessionId, from, to) {
     return false;
 }
 
-async function elementById(sessionId, id) {
 
+async function click(sessionId, element) {
+    if (appiumHandler && checkSession(sessionId)) {
+        await appiumHandler.click(element);
+        return true;
+    }
+    return false;
+}
+
+async function sendKeys(sessionId, element, keys) {
+    if (appiumHandler && checkSession(sessionId)) {
+        await appiumHandler.sendKeys(element, keys);
+        return true;
+    }
+    return false;
+}
+
+async function getText(sessionId, element) {
+    let text = '';
+    if (appiumHandler && checkSession(sessionId)) {
+        await appiumHandler.getText(element);
+    }
+    return text;
+}
+
+async function elementById(sessionId, id) {
+    let element = null;
+    if (appiumHandler && checkSession(sessionId)) {
+        element = await appiumHandler.elementById(id);
+    }
+    return element;
 }
 
 async function waitForElementById(sessionId, id) {
-
+    let element = null;
+    if (appiumHandler && checkSession(sessionId)) {
+        element = await appiumHandler.waitForElementById(id);
+    }
+    return element;
 }
 
 async function elementsByAccessibilityId(sessionId, content_desc) {
-
+    let element = null;
+    if (appiumHandler && checkSession(sessionId)) {
+        element = await appiumHandler.elementsByAccessibilityId(content_desc);
+    }
+    return element;
 }
 
 async function waitForElementByAccessibilityId(sessionId, content_desc) {
-
+    let element = null;
+    if (appiumHandler && checkSession(sessionId)) {
+        element = await appiumHandler.waitForElementByAccessibilityId(content_desc);
+    }
+    return element;
 }
 
 async function elementsByClassName(sessionId, class_name) {
-
+    let element = null;
+    if (appiumHandler && checkSession(sessionId)) {
+        element = await appiumHandler.elementsByClassName(class_name);
+    }
+    return element;
 }
 
 async function waitForElementByClassName(sessionId, class_name) {
-
+    let element = null;
+    if (appiumHandler && checkSession(sessionId)) {
+        element = await appiumHandler.waitForElementByClassName(class_name);
+    }
+    return element;
 }
 
 async function elementsByXPath(sessionId, xpath) {
-
+    let element = null;
+    if (appiumHandler && checkSession(sessionId)) {
+        element = await appiumHandler.elementsByXPath(xpath);
+    }
+    return element;
 }
 
 async function waitForElementByXPath(sessionId, xpath) {
-
+    let element = null;
+    if (appiumHandler && checkSession(sessionId)) {
+        element = await appiumHandler.waitForElementByXPath(xpath);
+    }
+    return element;
 }
 
 async function getCurrentActivity(sessionId) {
-
+    let activity = '';
+    if (appiumHandler && checkSession(sessionId)) {
+        activity = await appiumHandler.getCurrentActivity();
+    }
+    return activity;
 }
 
 async function getCurrentPackage(sessionId) {
-
+    let pkg = '';
+    if (appiumHandler && checkSession(sessionId)) {
+        pkg = await appiumHandler.getCurrentPackage();
+    }
+    return pkg;
 }
 
 async function startActivity(sessionId, pkg, activity) {
-
+    if (appiumHandler && checkSession(sessionId)) {
+        await appiumHandler.startActivity(pkg, activity);
+    }
+    return false;
 }
 
 module.exports = {
@@ -336,5 +403,19 @@ module.exports = {
     takeAppScreenshot,
     windowSize,
     tap,
-    swipe
+    swipe,
+    click,
+    sendKeys,
+    getText,
+    elementById,
+    waitForElementById,
+    elementsByAccessibilityId,
+    waitForElementByAccessibilityId,
+    elementsByClassName,
+    waitForElementByClassName,
+    elementsByXPath,
+    waitForElementByXPath,
+    getCurrentActivity,
+    getCurrentPackage,
+    startActivity
 };

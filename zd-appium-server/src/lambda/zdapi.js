@@ -13,6 +13,7 @@ const URL_ANDROID_PACKAGE = URL_ANDROID_SERVER + '/packages';
 const URL_ANDROID_ACTIVITY = URL_ANDROID_SERVER + '/activity';
 
 let userId = null;
+let sessionId = null;
 
 const http = {
     async get(url, data) {
@@ -82,13 +83,15 @@ async function getActivity(pkg) {
 }
 
 async function createSession(model, platform, pkg, activity) {
-    return await axios.post(URL_APPIUM_CREATE_SESSION, {
+    const result = await axios.post(URL_APPIUM_CREATE_SESSION, {
         model,
         platform,
         pkg,
         activity,
         userId
     });
+    sessionId = result.data;
+    return sessionId;
 }
 
 async function killSession() {
@@ -97,7 +100,41 @@ async function killSession() {
     });
 }
 
+async function elementById(id) {
 
+}
+
+async function elementsByClassName(class_name) {
+
+}
+
+async function elementsByAccessibilityId(content_desc) {
+
+}
+
+async function elementsByXPath(xpath) {
+
+}
+
+async function click(element) {
+
+}
+
+async function tap(x, y) {
+
+}
+
+async function swipe(from, to) {
+
+}
+
+async function sendKeys(element, keys) {
+
+}
+
+async function getText(element) {
+
+}
 
 module.exports = {
     setUserId,

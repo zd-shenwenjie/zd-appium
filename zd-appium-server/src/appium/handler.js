@@ -112,7 +112,7 @@ class AppiumHandler {
     }
 
     async getText(element) {
-        return element.text();
+        return await element.text();
     }
 
     async elementById(id) {
