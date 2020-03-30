@@ -4,6 +4,7 @@ import 'antd/dist/antd.css';
 import MonacoEditor from 'react-monaco-editor';
 import { runScript } from '../http/api';
 
+
 class Editor extends Component {
 
     constructor(props) {
@@ -11,6 +12,10 @@ class Editor extends Component {
         this.state = {
             script: ''
         }
+    }
+
+    componentDidMount() {
+        
     }
 
     render() {
@@ -45,15 +50,16 @@ class Editor extends Component {
 
     handleRunScript(e) {
         const script = this.state.script;
-        if (script) {
-            runScript(script).then(res => {
+        const userId = this.props.handleGetUserId();
+        if (userId && script) {
+            runScript(userId, script).then(res => {
                 const result = res.data;
                 console.log(JSON.stringify(result));
             }).catch(error => {
                 message.error(error.message);
             });
         } else {
-            message.error('script is null.');
+            message.error(`script = ${script} or uid = ${userId} is null.`);
         }
     }
 

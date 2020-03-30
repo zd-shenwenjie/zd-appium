@@ -1,15 +1,17 @@
 var vm = require('vm');
-const api = require('./zdapi')
+const zdapi = require('./zdapi')
 
 class Runner {
 
-    constructor(scriptId) {
+    constructor(userId, scriptId) {
+        this.userId = userId;
         this.scriptId = scriptId;
     }
 
     async run(script) {
         script = `
             async function run() {
+                setUserId('${this.userId}');
                 ${script}
             }
             
@@ -17,7 +19,7 @@ class Runner {
                 console.log(e.message)
             });
         `;
-        await vm.runInNewContext(script, api);
+        await vm.runInNewContext(script, zdapi);
     }
 
 }

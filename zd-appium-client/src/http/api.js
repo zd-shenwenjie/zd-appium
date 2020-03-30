@@ -249,8 +249,9 @@ export function swipe(sessionId, from, to) {
     });
 }
 
-export function runScript(script) {
+export function runScript(userId, script) {
     return axios.post(URL_LAMBDA_SCRIPT, {
+        userId,
         script
     });
 }

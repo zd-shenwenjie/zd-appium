@@ -4,7 +4,7 @@ const crypto = require("crypto");
 class Looper {
 
     constructor() {
-        this.queue = []; //[{id, script}, ...]
+        this.queue = []; //[{userId, scriptId, script}, ...]
         this.isExecuting = false;
     }
 
@@ -15,9 +15,9 @@ class Looper {
         return this.instance;
     }
 
-    enqueue(script) {
+    enqueue(userId, script) {
         const scriptId = crypto.randomBytes(16).toString("hex").substr(0, 6);
-        this.queue.push({ scriptId, script });
+        this.queue.push({ userId, scriptId, script });
         console.log(`The scriptId = ${scriptId} has entered the queue.`);
         if (!this.isExecuting) {
             this.execute(this.queue[0]);
@@ -30,9 +30,9 @@ class Looper {
         console.log(`The scriptId = ${scriptId} has removed the queue.`);
     }
 
-    async execute({ scriptId, script }) {
+    async execute({ userId, scriptId, script }) {
         this.isExecuting = true;
-        const client = new Runner(scriptId);
+        const client = new Runner(userId, scriptId);
         await client.run(script);
         this.isExecuting = false;
         this.dequeue();

@@ -20,14 +20,15 @@ app.listen(port, () => {
 });
 
 router.route('/script').post((req, res) => {
+    const userId = req.body.userId;
     const script = req.body.script;
-    if (script) {
-        const id = Looper.getInstance().enqueue(script);
-        if (id) {
+    if (userId && script) {
+        const scriptId = Looper.getInstance().enqueue(userId, script);
+        if (scriptId) {
             res.status(200).json({
                 code: 200,
-                msg: 'The script has entered the queue.',
-                data: id
+                msg: `The script has entered the queue.${scriptId}`,
+                data: scriptId
             });
         } else {
             res.status(400).json({
