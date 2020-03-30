@@ -97,6 +97,8 @@ async function killSession() {
     });
 }
 
+
+
 module.exports = {
     setUserId,
     getDevices,

@@ -4,7 +4,7 @@ const crypto = require("crypto");
 class Looper {
 
     constructor() {
-        this.queue = []; //[{userId, scriptId, script}, ...]
+        this.queue = [];
         this.isExecuting = false;
     }
 

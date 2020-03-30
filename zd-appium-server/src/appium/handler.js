@@ -103,6 +103,18 @@ class AppiumHandler {
             .perform();
     }
 
+    async click(element) {
+        await element.click();
+    }
+
+    async sendKeys(element, keys) {
+        await element.sendKeys(keys);
+    }
+
+    async getText(element) {
+        return element.text();
+    }
+
     async elementById(id) {
         return await this.driver.elementById(id);
     }
@@ -110,6 +122,43 @@ class AppiumHandler {
     async waitForElementById(id) {
         return await this.driver.waitForElementById(id);
     }
+
+    async elementsByAccessibilityId(content_desc) {
+        return await this.driver.elementsByAccessibilityId(content_desc);
+    }
+
+    async waitForElementByAccessibilityId(content_desc) {
+        await driver.waitForElementByAccessibilityId(content_desc);
+    }
+
+    async elementsByClassName(class_name) {
+        return await this.driver.elementsByClassName(class_name);
+    }
+
+    async waitForElementByClassName(class_name) {
+        return await this.driver.waitForElementByClassName(class_name);
+    }
+
+    async elementsByXPath(xpath) {
+        return await this.driver.elementsByXPath(xpath);
+    }
+
+    async waitForElementByXPath(xpath) {
+        return await this.driver.waitForElementByXPath(xpath)
+    }
+
+    async getCurrentActivity() {
+        return await this.driver.getCurrentActivity();
+    }
+
+    async getCurrentPackage() {
+        return await this.driver.getCurrentPackage();
+    }
+
+    async startActivity(pkg, activity) {
+        return await this.driver.startActivity({appPackage: pkg, appActivity: activity});
+    }
+
 }
 
 module.exports = AppiumHandler

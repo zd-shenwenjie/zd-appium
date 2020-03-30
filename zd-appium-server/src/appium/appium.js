@@ -51,7 +51,7 @@ async function killSession(killer = { ip: '127.0.0.1' }) {
 const appiumHandlerListener = function (status) {
     if (status == 'invalid' || status == 'error') {
         killSession();
-        if(appiumOwner && appiumOwner.hasOwnProperty('socketId')) {
+        if (appiumOwner && appiumOwner.hasOwnProperty('socketId')) {
             appiumSender('session_invalid', appiumOwner.socketId);
         }
     }
@@ -277,6 +277,50 @@ async function swipe(sessionId, from, to) {
         return true;
     }
     return false;
+}
+
+async function elementById(sessionId, id) {
+
+}
+
+async function waitForElementById(sessionId, id) {
+
+}
+
+async function elementsByAccessibilityId(sessionId, content_desc) {
+
+}
+
+async function waitForElementByAccessibilityId(sessionId, content_desc) {
+
+}
+
+async function elementsByClassName(sessionId, class_name) {
+
+}
+
+async function waitForElementByClassName(sessionId, class_name) {
+
+}
+
+async function elementsByXPath(sessionId, xpath) {
+
+}
+
+async function waitForElementByXPath(sessionId, xpath) {
+
+}
+
+async function getCurrentActivity(sessionId) {
+
+}
+
+async function getCurrentPackage(sessionId) {
+
+}
+
+async function startActivity(sessionId, pkg, activity) {
+
 }
 
 module.exports = {
