@@ -43,3 +43,5 @@ router.route('/script').post((req, res) => {
         });
     }
 });
+
+console.log('hello lambda.')

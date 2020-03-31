@@ -262,7 +262,7 @@ async function windowSize(sessionId) {
     return size;
 }
 
-async function tap(sessionId, x, y) {
+async function tapByCoordinates(sessionId, x, y) {
     if (appiumHandler && checkSession(sessionId)) {
         await appiumHandler.tap(x, y);
         return true;
@@ -270,7 +270,7 @@ async function tap(sessionId, x, y) {
     return false;
 }
 
-async function swipe(sessionId, from, to) {
+async function swipeByCoordinates(sessionId, from, to) {
     if (appiumHandler && checkSession(sessionId)) {
         await appiumHandler.swipe(from, to);
         return true;
@@ -278,27 +278,90 @@ async function swipe(sessionId, from, to) {
     return false;
 }
 
+async function click(sessionId, { resource_id, content_desc, class_name, xpath, index = 0, isWaitFor = false }) {
+    if (appiumHandler && checkSession(sessionId) && (resource_id || content_desc || class_name || xpath)) {
+        const element = null;
+        if (resource_id) {
+            element = isWaitFor ? await waitForElementById(resource_id) : await elementById(sessionId, resource_id);
+        } else if (content_desc) {
+            const elements = isWaitFor ? await waitForElementsByAccessibilityId(content_desc) : await elementsByAccessibilityId(sessionId, content_desc);
+            if (elements) {
+                element = elements[index];
+            }
+        } else if (class_name) {
+            const elements = isWaitFor ? await waitForElementsByClassName(class_name) : await elementsByClassName(sessionId, class_name);
+            if (elements) {
+                element = elements[index];
+            }
+        } else if (xpath) {
+            const elements = isWaitFor ? await waitForElementsByXPath(xpath) : await elementsByXPath(sessionId, xpath);
+            if (elements) {
+                element = elements[index];
+            }
+        }
+        if (element) {
+            await element.click();
+            return true;
+        }
+    }
+    return false;
+}
 
-async function click(sessionId, element) {
-    if (appiumHandler && checkSession(sessionId)) {
-        await appiumHandler.click(element);
+async function sendKeys(sessionId, { resource_id, content_desc, class_name, xpath, index = 0, isWaitFor = false }, keys) {
+    if (appiumHandler && checkSession(sessionId) && (resource_id || content_desc || class_name || xpath) && keys) {
+        const element = null;
+        if (resource_id) {
+            element = isWaitFor ? await waitForElementById(resource_id) : await elementById(sessionId, resource_id);
+        } else if (content_desc) {
+            const elements = isWaitFor ? await waitForElementsByAccessibilityId(content_desc) : await elementsByAccessibilityId(sessionId, content_desc);
+            if (elements) {
+                element = elements[index];
+            }
+        } else if (class_name) {
+            const elements = isWaitFor ? await waitForElementsByClassName(class_name) : await elementsByClassName(sessionId, class_name);
+            if (elements) {
+                element = elements[index];
+            }
+        } else if (xpath) {
+            const elements = isWaitFor ? await waitForElementsByXPath(xpath) : await elementsByXPath(sessionId, xpath);
+            if (elements) {
+                element = elements[index];
+            }
+        }
+        if (element) {
+            await element.sendKeys(keys);
+            return true;
+        }
         return true;
     }
     return false;
 }
 
-async function sendKeys(sessionId, element, keys) {
-    if (appiumHandler && checkSession(sessionId)) {
-        await appiumHandler.sendKeys(element, keys);
-        return true;
-    }
-    return false;
-}
-
-async function getText(sessionId, element) {
+async function getText(sessionId, { resource_id, content_desc, class_name, xpath, index = 0, isWaitFor = false }) {
     let text = '';
-    if (appiumHandler && checkSession(sessionId)) {
-        await appiumHandler.getText(element);
+    if (appiumHandler && checkSession(sessionId) && (resource_id || content_desc || class_name || xpath)) {
+        const element = null;
+        if (resource_id) {
+            element = isWaitFor ? await waitForElementById(resource_id) : await elementById(sessionId, resource_id);
+        } else if (content_desc) {
+            const elements = isWaitFor ? await waitForElementsByAccessibilityId(content_desc) : await elementsByAccessibilityId(sessionId, content_desc);
+            if (elements) {
+                element = elements[index];
+            }
+        } else if (class_name) {
+            const elements = isWaitFor ? await waitForElementsByClassName(class_name) : await elementsByClassName(sessionId, class_name);
+            if (elements) {
+                element = elements[index];
+            }
+        } else if (xpath) {
+            const elements = isWaitFor ? await waitForElementsByXPath(xpath) : await elementsByXPath(sessionId, xpath);
+            if (elements) {
+                element = elements[index];
+            }
+        }
+        if (element) {
+            text = await element.text();
+        }
     }
     return text;
 }
@@ -320,51 +383,51 @@ async function waitForElementById(sessionId, id) {
 }
 
 async function elementsByAccessibilityId(sessionId, content_desc) {
-    let element = null;
+    let elements = [];
     if (appiumHandler && checkSession(sessionId)) {
-        element = await appiumHandler.elementsByAccessibilityId(content_desc);
+        elements = await appiumHandler.elementsByAccessibilityId(content_desc);
     }
     return element;
 }
 
-async function waitForElementByAccessibilityId(sessionId, content_desc) {
-    let element = null;
+async function waitForElementsByAccessibilityId(sessionId, content_desc) {
+    let elements = [];
     if (appiumHandler && checkSession(sessionId)) {
-        element = await appiumHandler.waitForElementByAccessibilityId(content_desc);
+        elements = await appiumHandler.waitForElementsByAccessibilityId(content_desc);
     }
-    return element;
+    return elements;
 }
 
 async function elementsByClassName(sessionId, class_name) {
-    let element = null;
+    let elements = [];
     if (appiumHandler && checkSession(sessionId)) {
-        element = await appiumHandler.elementsByClassName(class_name);
+        elements = await appiumHandler.elementsByClassName(class_name);
     }
-    return element;
+    return elements;
 }
 
-async function waitForElementByClassName(sessionId, class_name) {
-    let element = null;
+async function waitForElementsByClassName(sessionId, class_name) {
+    let elements = [];
     if (appiumHandler && checkSession(sessionId)) {
-        element = await appiumHandler.waitForElementByClassName(class_name);
+        elements = await appiumHandler.waitForElementsByClassName(class_name);
     }
-    return element;
+    return elements;
 }
 
 async function elementsByXPath(sessionId, xpath) {
-    let element = null;
+    let elements = [];
     if (appiumHandler && checkSession(sessionId)) {
-        element = await appiumHandler.elementsByXPath(xpath);
+        elements = await appiumHandler.elementsByXPath(xpath);
     }
-    return element;
+    return elements;
 }
 
-async function waitForElementByXPath(sessionId, xpath) {
-    let element = null;
+async function waitForElementsByXPath(sessionId, xpath) {
+    let elements = [];
     if (appiumHandler && checkSession(sessionId)) {
-        element = await appiumHandler.waitForElementByXPath(xpath);
+        elements = await appiumHandler.waitForElementsByXPath(xpath);
     }
-    return element;
+    return elements;
 }
 
 async function getCurrentActivity(sessionId) {
@@ -402,19 +465,11 @@ module.exports = {
     readAppSource,
     takeAppScreenshot,
     windowSize,
-    tap,
-    swipe,
+    tapByCoordinates,
+    swipeByCoordinates,
     click,
     sendKeys,
     getText,
-    elementById,
-    waitForElementById,
-    elementsByAccessibilityId,
-    waitForElementByAccessibilityId,
-    elementsByClassName,
-    waitForElementByClassName,
-    elementsByXPath,
-    waitForElementByXPath,
     getCurrentActivity,
     getCurrentPackage,
     startActivity

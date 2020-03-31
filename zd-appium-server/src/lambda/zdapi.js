@@ -5,12 +5,20 @@ const URL_ANDROID_SERVER = 'http://localhost:7004';
 
 const URL_APPIUM_CREATE_SESSION = URL_APPIUM_SERVER + '/createSession';
 const URL_APPIUM_KILL_SESSION = URL_APPIUM_SERVER + '/killSession';
+const URL_APPIUM_TAP = URL_APPIUM_SERVER + '/tap';
+const URL_APPIUM_SWIPE = URL_APPIUM_SERVER + '/swipe';
+const URL_APPIUM_CLICK = URL_APPIUM_SERVER + '/click';
+const URL_APPIUM_SEND = URL_APPIUM_SERVER + '/sendKeys';
+const URL_APPIUM_TEXT = URL_APPIUM_SERVER + '/getText';
+const URL_APPIUM_ACTIVITY = URL_APPIUM_SERVER + '/getCurrentActivity';
+const URL_APPIUM_PACKAGE = URL_APPIUM_SERVER + '/getCurrentPackage';
+const URL_APPIUM_START_ACTIVITY = URL_APPIUM_SERVER + '/startActivity';
 
 const URL_ANDROID_DEVICE = URL_ANDROID_SERVER + '/devcies';
 const URL_ANDROID_PLATFORM = URL_ANDROID_SERVER + '/platform';
 const URL_ANDROID_MODEL = URL_ANDROID_SERVER + '/model';
 const URL_ANDROID_PACKAGE = URL_ANDROID_SERVER + '/packages';
-const URL_ANDROID_ACTIVITY = URL_ANDROID_SERVER + '/activity';
+const URL_ANDROID_LAUNCHER = URL_ANDROID_SERVER + '/activity';
 
 let userId = null;
 let sessionId = null;
@@ -76,14 +84,14 @@ async function getPackages() {
     return pkgs;
 }
 
-async function getActivity(pkg) {
-    const result = await http.get(URL_ANDROID_ACTIVITY, { pkg });
+async function getLauncher(pkg) {
+    const result = await http.get(URL_ANDROID_LAUNCHER, { pkg });
     const activity = result.data;
     return activity;
 }
 
 async function createSession(model, platform, pkg, activity) {
-    const result = await axios.post(URL_APPIUM_CREATE_SESSION, {
+    const result = await http.post(URL_APPIUM_CREATE_SESSION, {
         model,
         platform,
         pkg,
@@ -95,46 +103,75 @@ async function createSession(model, platform, pkg, activity) {
 }
 
 async function killSession() {
-    return await axios.post(URL_APPIUM_KILL_SESSION, {
+    await http.post(URL_APPIUM_KILL_SESSION, {
         userId
     });
 }
 
-async function elementById(id) {
-
+async function click({ resource_id, content_desc, class_name, xpath, index, isWaitFor }) {
+    await http.post(URL_APPIUM_CLICK, {
+        sessionId,
+        resource_id,
+        content_desc,
+        class_name,
+        xpath,
+        index,
+        isWaitFor
+    });
 }
 
-async function elementsByClassName(class_name) {
-
+async function sendKeys({ resource_id, content_desc, class_name, xpath, index, isWaitFor }, keys) {
+    await http.post(URL_APPIUM_SEND, {
+        sessionId,
+        resource_id,
+        content_desc,
+        class_name,
+        xpath,
+        index,
+        isWaitFor,
+        keys
+    })
 }
 
-async function elementsByAccessibilityId(content_desc) {
-
-}
-
-async function elementsByXPath(xpath) {
-
-}
-
-async function click(element) {
-
+async function getText({ resource_id, content_desc, class_name, xpath, index, isWaitFor }) {
+    const text = await http.post(URL_APPIUM_TEXT, {
+        sessionId,
+        resource_id,
+        content_desc,
+        class_name,
+        xpath,
+        index,
+        isWaitFor
+    })
+    return text;
 }
 
 async function tap(x, y) {
-
+    await http.post(URL_APPIUM_TAP, {
+        sessionId, x, y
+    });
 }
 
 async function swipe(from, to) {
-
+    await http.post(URL_APPIUM_SWIPE, {
+        sessionId, from, to
+    });
 }
 
-async function sendKeys(element, keys) {
-
+async function getCurrentActivity() {
+    const activity = http.post(URL_APPIUM_ACTIVITY, { sessionId });
+    return activity;
 }
 
-async function getText(element) {
-
+async function getCurrentPackage() {
+    const pkg = http.post(URL_APPIUM_PACKAGE, { sessionId });
+    return pkg;
 }
+
+async function startActivity() {
+    await http.post(URL_APPIUM_START_ACTIVITY, { sessionId })
+}
+
 
 module.exports = {
     setUserId,
@@ -142,7 +179,15 @@ module.exports = {
     getModel,
     getPlatform,
     getPackages,
-    getActivity,
+    getLauncher,
     createSession,
-    killSession
+    killSession,
+    tap,
+    swipe,
+    click,
+    sendKeys,
+    getText,
+    getCurrentActivity,
+    getCurrentPackage,
+    startActivity
 }

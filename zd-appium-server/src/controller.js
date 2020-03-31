@@ -24,8 +24,15 @@ function startServer(server) {
     const name = server.name;
     const port = server.port;
     const script = path.join(__dirname, name, 'index.js');
-    exec(`node ${script} ${port}`, (err, stdout, stderr) => {
-        console.log(err, stdout, stderr);
+    const process = exec(`node ${script} ${port}`, (err, stdout, stderr) => {
+        if (err) {
+            console.log(err.message);
+            return;
+        }
+        console.log(stdout, stderr)
+    });
+    process.stdout.on('data', (data) => {
+        console.log(data);
     });
 }
 

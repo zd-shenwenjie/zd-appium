@@ -10,20 +10,11 @@ const {
     readAppSource,
     takeAppScreenshot,
     windowSize,
-    tap,
-    swipe,
+    tapByCoordinates,
+    swipeByCoordinates,
     click,
     sendKeys,
     getText,
-    elementById,
-    waitForElementById,
-    elementsByAccessibilityId,
-    waitForElementByAccessibilityId,
-    elementsByClassName,
-    waitForElementByClassName,
-    elementsByXPath,
-    waitForElementByXPath,
-    getCurrentActivity,
     getCurrentPackage,
     startActivity
 } = require('./appium');
@@ -252,7 +243,7 @@ router.route('/windowSize').get(async (req, res) => {
 router.route('/tap').post(async (req, res) => {
     const { sessionId, x, y } = req.body;
     if (sessionId && x && y) {
-        const result = await tap(sessionId, x, y);
+        const result = await tapByCoordinates(sessionId, x, y);
         if (result) {
             res.status(200).json({
                 code: 200,
@@ -279,7 +270,7 @@ router.route('/swipe').post(async (req, res) => {
     if (sessionId &&
         from && from.hasOwnProperty('x') && from.hasOwnProperty('y') &&
         to && to.hasOwnProperty('x') && to.hasOwnProperty('y')) {
-        const result = await swipe(sessionId, from, to);
+        const result = await swipeByCoordinates(sessionId, from, to);
         if (result) {
             res.status(200).json({
                 code: 200,
@@ -302,9 +293,9 @@ router.route('/swipe').post(async (req, res) => {
 });
 
 router.route('/click').post(async (req, res) => {
-    const { sessionId, element } = req.body;
-    if (sessionId && element) {
-        await click(sessionId, element);
+    const { sessionId, resource_id, content_desc, class_name, xpath, index, isWaitFor } = req.body;
+    if (sessionId && (resource_id || content_desc || class_name || xpath)) {
+        await click(sessionId, { resource_id, content_desc, class_name, xpath, index, isWaitFor });
         res.status(200).json({
             code: 200,
             msg: 'click',
@@ -318,25 +309,25 @@ router.route('/click').post(async (req, res) => {
 });
 
 router.route('/sendKeys').post(async (req, res) => {
-    const { sessionId, element, keys } = req.body;
-    if (sessionId && element && keys) {
-        await sendKeys(sessionId, element, keys);
+    const { sessionId, resource_id, content_desc, class_name, xpath, isWaitFor, index, keys } = req.body;
+    if (sessionId && (resource_id || content_desc || class_name || xpath) && keys) {
+        await sendKeys(sessionId, { resource_id, content_desc, class_name, xpath, index, isWaitFor }, keys);
         res.status(200).json({
             code: 200,
-            msg: 'sendKeys',
+            msg: 'send keys',
         })
     } else {
         res.status(400).json({
             code: 400,
-            msg: 'sendKeys args error.'
+            msg: 'send keys args error.'
         })
     }
 });
 
 router.route('/getText').post(async (req, res) => {
-    const { sessionId, element } = req.body;
-    if (sessionId && element) {
-        const text = await getText(sessionId, element);
+    const { sessionId, resource_id, content_desc, class_name, xpath, index, isWaitFor } = req.body;
+    if (sessionId && (resource_id || content_desc || class_name || xpath)) {
+        const text = await getText(sessionId, { resource_id, content_desc, class_name, xpath, index, isWaitFor });
         res.status(200).json({
             code: 200,
             msg: 'getText',
@@ -399,132 +390,3 @@ router.route('/startActivity').post(async (req, res) => {
         })
     }
 });
-
-router.route('/elementById').post(async (req, res) => {
-    const { sessionId, id } = req.body;
-    if (sessionId && id) {
-        await elementById(sessionId, id);
-        res.status(200).json({
-            code: 200,
-            msg: 'elementById'
-        })
-    } else {
-        res.status(400).json({
-            code: 400,
-            msg: 'elementById args error.'
-        })
-    }
-});
-
-router.route('/waitForElementById').post(async (req, res) => {
-    const { sessionId, id } = req.body;
-    if (sessionId && id) {
-        await waitForElementById(sessionId, id);
-        res.status(200).json({
-            code: 200,
-            msg: 'waitForElementById'
-        })
-    } else {
-        res.status(400).json({
-            code: 400,
-            msg: 'waitForElementById args error.'
-        })
-    }
-});
-
-router.route('/elementsByAccessibilityId').post(async (req, res) => {
-    const { sessionId, desc } = req.body;
-    if (sessionId && desc) {
-        await elementsByAccessibilityId(sessionId, desc);
-        res.status(200).json({
-            code: 200,
-            msg: 'elementsByAccessibilityId'
-        })
-    } else {
-        res.status(400).json({
-            code: 400,
-            msg: 'elementsByAccessibilityId args error.'
-        })
-    }
-});
-
-router.route('/waitForElementByAccessibilityId').post(async (req, res) => {
-    const { sessionId, desc } = req.body;
-    if (sessionId && desc) {
-        await waitForElementByAccessibilityId(sessionId, desc);
-        res.status(200).json({
-            code: 200,
-            msg: 'waitForElementByAccessibilityId'
-        })
-    } else {
-        res.status(400).json({
-            code: 400,
-            msg: 'waitForElementByAccessibilityId args error.'
-        })
-    }
-});
-
-router.route('/elementsByClassName').post(async (req, res) => {
-    const { sessionId, name } = req.body;
-    if (sessionId && name) {
-        await elementsByClassName(sessionId, name);
-        res.status(200).json({
-            code: 200,
-            msg: 'elementsByClassName'
-        })
-    } else {
-        res.status(400).json({
-            code: 400,
-            msg: 'elementsByClassName args error.'
-        })
-    }
-});
-
-router.route('/waitForElementByClassName').post(async (req, res) => {
-    const { sessionId, name } = req.body;
-    if (sessionId && name) {
-        await waitForElementByClassName(sessionId, name);
-        res.status(200).json({
-            code: 200,
-            msg: 'waitForElementByClassName'
-        })
-    } else {
-        res.status(400).json({
-            code: 400,
-            msg: 'waitForElementByClassName args error.'
-        })
-    }
-});
-
-router.route('/elementsByXPath').post(async (req, res) => {
-    const { sessionId, xpath } = req.body;
-    if (sessionId && xpath) {
-        await elementsByXPath(sessionId, xpath);
-        res.status(200).json({
-            code: 200,
-            msg: 'elementsByXPath'
-        })
-    } else {
-        res.status(400).json({
-            code: 400,
-            msg: 'elementsByXPath args error.'
-        })
-    }
-});
-
-router.route('/waitForElementByXPath').post(async (req, res) => {
-    const { sessionId, xpath } = req.body;
-    if (sessionId && xpath) {
-        await waitForElementByXPath(sessionId, xpath);
-        res.status(200).json({
-            code: 200,
-            msg: 'waitForElementByXPath'
-        })
-    } else {
-        res.status(400).json({
-            code: 400,
-            msg: 'waitForElementByXPath args error.'
-        })
-    }
-});
-

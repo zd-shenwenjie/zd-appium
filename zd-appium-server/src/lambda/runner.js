@@ -21,10 +21,7 @@ class Runner {
         `;
         await vm.runInNewContext(script, zdapi);
     }
-
 }
-
-
 
 module.exports = Runner;
 

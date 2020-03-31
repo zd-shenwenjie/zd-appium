@@ -103,18 +103,6 @@ class AppiumHandler {
             .perform();
     }
 
-    async click(element) {
-        await element.click();
-    }
-
-    async sendKeys(element, keys) {
-        await element.sendKeys(keys);
-    }
-
-    async getText(element) {
-        return await element.text();
-    }
-
     async elementById(id) {
         return await this.driver.elementById(id);
     }
@@ -127,24 +115,24 @@ class AppiumHandler {
         return await this.driver.elementsByAccessibilityId(content_desc);
     }
 
-    async waitForElementByAccessibilityId(content_desc) {
-        await driver.waitForElementByAccessibilityId(content_desc);
+    async waitForElementsByAccessibilityId(content_desc) {
+        return await driver.waitForElementsByAccessibilityId(content_desc);
     }
 
     async elementsByClassName(class_name) {
         return await this.driver.elementsByClassName(class_name);
     }
 
-    async waitForElementByClassName(class_name) {
-        return await this.driver.waitForElementByClassName(class_name);
+    async waitForElementsByClassName(class_name) {
+        return await this.driver.waitForElementsByClassName(class_name);
     }
 
     async elementsByXPath(xpath) {
         return await this.driver.elementsByXPath(xpath);
     }
 
-    async waitForElementByXPath(xpath) {
-        return await this.driver.waitForElementByXPath(xpath)
+    async waitForElementsByXPath(xpath) {
+        return await this.driver.waitForElementsByXPath(xpath)
     }
 
     async getCurrentActivity() {
