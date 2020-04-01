@@ -7,7 +7,7 @@ import {
 class Elements extends Component {
     constructor(props) {
         super(props);
-        this.sessionId='';
+        this.sessionId = '';
         this.elementAttributes = {};
         this.state = {
             elements: [],
@@ -17,23 +17,23 @@ class Elements extends Component {
     }
 
     componentDidMount() {
-        this.props.onRef(this);     
+        this.props.onRef(this);
     }
 
     render() {
         return (
             <div >
-                <div style={{ width: '800px', height: "40px" }}>
+                <div style={{ width: '1400px', height: "40px", background: 'lightgray' }}>
                     <Button
-                        style={{ width: '150px', height: '30px', margin: '5px', float: 'right' }}
+                        style={{ width: '150px', height: '30px', margin: '5px' }}
                         onClick={this.handleReadAppSource.bind(this)}
                     >
-                        App Crawler
+                        App Source
                     </Button>
                 </div >
 
-                <div style={{ width: '800px', height: "500px", display: 'flex' }}>
-                    <div style={{ width: '60%', height: '100%' }} >
+                <div style={{ width: '1400px', height: "500px", display: 'flex' }}>
+                    <div style={{ width: '800px', height: '100%' }} >
                         <Tree
                             height={500}
                             showLine={true}
@@ -41,7 +41,7 @@ class Elements extends Component {
                             treeData={this.state.elements}
                         />
                     </div>
-                    <div style={{ width: '40%', height: '100%' }} >
+                    <div style={{ width: '600px', height: '100%' }} >
                         <List
                             style={{ width: '100%', height: '100%', overflow: 'auto' }}
                             size={'small'}
@@ -49,7 +49,7 @@ class Elements extends Component {
                             dataSource={this.state.selectedAttributes}
                             renderItem={item => (
                                 <List.Item>
-                                 {item}
+                                    {item}
                                 </List.Item>
                             )}
                         />
@@ -72,6 +72,7 @@ class Elements extends Component {
             const attributes = this.elementAttributes[selectedKey];
             // console.log('attributes:' + JSON.stringify(attributes));
             const selectedAttributes = [];
+            selectedAttributes.push(`xpath = "${selectedKey}"`);
             for (const key of Object.keys(attributes)) {
                 const value = attributes[key];
                 selectedAttributes.push(`${key} = "${value}"`)
@@ -97,11 +98,13 @@ class Elements extends Component {
                             const node = nodes[tagName];
                             const xpath = node.xpath;
                             const attributes = node.attributes;
+
                             attributeMap[xpath] = attributes;
-                            // let resId = attributes && attributes.hasOwnProperty('resource-id') ? ` resource-id=${attributes['resource-id']}` : '';
-                            // let desc = attributes && attributes.hasOwnProperty('content-desc') ? ` content-desc=${attributes['content-desc']}` : '';
+                            let resId = attributes && attributes.hasOwnProperty('resource-id') ? ` resource-id=${attributes['resource-id']}` : '';
+                            let desc = attributes && attributes.hasOwnProperty('content-desc') ? ` content-desc=${attributes['content-desc']}` : '';
                             const children = node.children;
-                            const title = `<${tagName}>`
+                            const arr = tagName.split('_');
+                            const title = `<${arr[0]}[${arr[1]}]${resId}${desc}> `
                             element['title'] = title;
                             element['key'] = xpath;
                             element['children'] = parseSource(children);
@@ -115,7 +118,7 @@ class Elements extends Component {
                         elements
                     })
                     // console.log('attributes:', JSON.stringify(this.elementAttributes));
-                    // console.log(JSON.stringify(source));
+                    console.log(JSON.stringify(source));
                 }
             }).catch(error => {
                 message.error('read app source error:' + error.message);

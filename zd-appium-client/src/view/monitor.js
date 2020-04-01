@@ -35,12 +35,12 @@ class Monitor extends Component {
     render() {
         return (
             <div >
-                <div style={{ width: '800px', height: "40px" }}>
-                    <Button style={{ width: '150px', height: '30px', margin: '5px', float: 'right'}} onClick={this.handleClearLog.bind(this)} >Clear Log </Button>
+                <div style={{ width: '490px', height: "40px", background: 'lightgray' }}>
+                    <Button style={{ width: '150px', height: '30px', margin: '5px', float: 'right' }} onClick={this.handleClearLog.bind(this)} >Clear Log </Button>
                     <Button style={{ width: '150px', height: '30px', margin: '5px', float: 'right' }} onClick={this.handleGetAppiumServerLog.bind(this)}>Server Log</Button>
                 </div >
 
-                <div style={{ width: '800px', height: "500px", background: 'black', overflow: 'auto' }}>
+                <div style={{ width: '490px', height: "1040px", background: 'black', overflow: 'auto' }}>
                     {
                         this.state.logs.map((log, index) => {
                             return (

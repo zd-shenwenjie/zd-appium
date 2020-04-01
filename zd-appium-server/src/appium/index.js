@@ -15,6 +15,7 @@ const {
     click,
     sendKeys,
     getText,
+    getCurrentActivity,
     getCurrentPackage,
     startActivity
 } = require('./appium');
@@ -64,7 +65,7 @@ function saveUser(socket) {
     const address = socket.handshake.address;
     const ip = address.replace('::ffff:', '');
     users[socket.id] = ip;
-    console.log('save user:', socket.id, ip);
+    console.log('save user:', socket.id, 'ip:', ip);
     console.log('user num:', Object.keys(users).length);
 }
 
@@ -161,7 +162,7 @@ router.route('/killSession').post(async (req, res) => {
         await killSession(killer);
         res.status(200).json({
             code: 200,
-            msg: `kill session ${sessionId}`
+            msg: `kill session ${userId}`
         })
     } else {
         res.status(400).json({

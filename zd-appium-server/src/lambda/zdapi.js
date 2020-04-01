@@ -134,7 +134,8 @@ async function sendKeys({ resource_id, content_desc, class_name, xpath, index, i
 }
 
 async function getText({ resource_id, content_desc, class_name, xpath, index, isWaitFor }) {
-    const text = await http.post(URL_APPIUM_TEXT, {
+    let text = '';
+    const result = await http.post(URL_APPIUM_TEXT, {
         sessionId,
         resource_id,
         content_desc,
@@ -143,6 +144,9 @@ async function getText({ resource_id, content_desc, class_name, xpath, index, is
         index,
         isWaitFor
     })
+    if (result && result.data) {
+        text = result.data;
+    }
     return text;
 }
 
@@ -159,12 +163,14 @@ async function swipe(from, to) {
 }
 
 async function getCurrentActivity() {
-    const activity = http.post(URL_APPIUM_ACTIVITY, { sessionId });
+    const result = await http.post(URL_APPIUM_ACTIVITY, { sessionId });
+    const activity = result.data;
     return activity;
 }
 
 async function getCurrentPackage() {
-    const pkg = http.post(URL_APPIUM_PACKAGE, { sessionId });
+    const result = await http.post(URL_APPIUM_PACKAGE, { sessionId });
+    const pkg = result.data;
     return pkg;
 }
 

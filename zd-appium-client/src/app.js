@@ -158,7 +158,7 @@ class App extends Component {
 
     render() {
         return (
-            <div style={{ width: '100%' }}>
+            <div style={{ width: '100%'  }}>
                 <div style={{ width: '100%', height: '30px', margin: '10px' }}>
                     <Radio.Group value={this.state.status} onChange={this.handleChangeAppiumServer.bind(this)}>
                         <Radio.Button style={{ width: '155px' }} value="start">Start Appium</Radio.Button>
@@ -182,7 +182,7 @@ class App extends Component {
                         this.state.ownerIP ? <span style={{ marginLeft: '10px', color: 'blue' }} >{`${this.state.ownerIP} is Running`} </span> : null
                     }
                 </div>
-                <div style={{ width: '100%', height: '30px', margin: '10px' }}>
+                <div style={{ width: '100%', height: '30px', margin: '10px'}}>
                     <Radio.Group value={this.state.isRunKeepSessionLoop ? 'keep' : 'kill'} onChange={this.handleChangeKeepSessionLoop.bind(this)}>
                         <Radio.Button style={{ width: '155px' }} value="keep"> Keep Session Alive</Radio.Button>
                         <Radio.Button style={{ width: '155px' }} value="kill">Kill Session Alive</Radio.Button>
@@ -194,13 +194,19 @@ class App extends Component {
                     <Button style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleGetAndroidPackages.bind(this)} >Android Packages </Button>
                     <Button style={{ width: '150px', height: '30px', marginLeft: '10px' }} onClick={this.handleGetAndroidActivity.bind(this)} >Android Activity </Button>
                 </div>
-                <div style={{ width: '100%', marginTop: '10px', marginLeft: '10px', display: 'flex' }}>
-                    <Screen onRef={(screen_view) => { this.screen_view = screen_view }} />
-                    <Editor handleGetUserId={() => { return this.userId }} />
-                </div>
-                <div style={{ width: '100%', marginLeft: '10px', display: 'flex' }}>
-                    <Elements onRef={(elements_view) => { this.elements_view = elements_view }} />
-                    <Monitor />
+                <div style={{ width: '100%', display: 'flex' }}>
+                    <div>
+                        <div style={{ marginTop: '10px', marginLeft: '10px', display: 'flex' }}>
+                            <Screen onRef={(screen_view) => { this.screen_view = screen_view }} />
+                            <Editor handleGetUserId={() => { return this.userId }} />
+                        </div>
+                        <div style={{ marginLeft: '10px', display: 'flex' }}>
+                            <Elements onRef={(elements_view) => { this.elements_view = elements_view }} />
+                        </div>
+                    </div>
+                    <div style={{ marginTop: '10px' }}>
+                        <Monitor />
+                    </div>
                 </div>
             </div >
 

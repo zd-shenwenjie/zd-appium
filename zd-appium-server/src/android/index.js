@@ -24,13 +24,13 @@ router.route('/devcies').get((req, res) => {
         .replace('List of devices attached', '')
         .split('\r\n')
         .filter(i => { return i.indexOf('device') != -1 })
-        .map(i => { return i.replace('\t', '') });
+        .map(i => { return i.replace('\t', '').replace('device', '') });
     res.status(200).json({
         code: 200,
         msg: 'adb devices',
         data: devices
     });
-    console.log(devices);
+    // console.log(devices);
 });
 
 router.route('/model').get((req, res) => {
@@ -41,7 +41,7 @@ router.route('/model').get((req, res) => {
         msg: 'adb shell getprop ro.product.model',
         data: model
     });
-    console.log(model);
+    // console.log(model);
 });
 
 router.route('/platform').get((req, res) => {
@@ -52,7 +52,7 @@ router.route('/platform').get((req, res) => {
         msg: 'adb shell getprop ro.build.version.release',
         data: platform
     });
-    console.log(platform);
+    // console.log(platform);
 });
 
 router.route('/packages').get((req, res) => {
@@ -71,7 +71,7 @@ router.route('/packages').get((req, res) => {
         msg: 'adb shell pm list packages',
         data: packages
     });
-    console.log(packages);
+    // console.log(packages);
 });
 
 router.route('/activity').get((req, res) => {
@@ -91,7 +91,7 @@ router.route('/activity').get((req, res) => {
                     msg: `adb shell dumpsys package ${pkg}`,
                     data: activity
                 });
-                console.log(activity);
+                // console.log(activity);
             } else {
                 res.status(500).json({
                     code: 500,

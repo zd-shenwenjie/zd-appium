@@ -15,20 +15,20 @@ class Editor extends Component {
     }
 
     componentDidMount() {
-        
+
     }
 
     render() {
         return (
             <div >
-                <div style={{ width: '800px', height: '40px' }}>
+                <div style={{ width: '600px', height: '40px', background: 'lightgray' }}>
                     <Button
                         style={{ width: '150px', height: '30px', margin: '5px', float: 'right' }}
                         onClick={this.handleRunScript.bind(this)}>
                         Run Script
                     </Button>
                 </div>
-                <div style={{ width: '800px', height: '500px' }} >
+                <div style={{ width: '600px', height: '500px' }} >
                     <MonacoEditor
                         style={{ width: '100%', height: '100%' }}
                         language="javascript"

@@ -35,15 +35,15 @@ class Screen extends Component {
     render() {
         return (
             <div>
-                <div style={{ width: '800px', height: "40px" }}>
+                <div style={{ width: '800px', height: "40px", background: 'lightgray' }}>
                     <Radio.Group value={this.state.touchEvent} onChange={this.handleChangeTouchEvent.bind(this)}>
-                        <Radio.Button style={{ width: '155px' }} value="tap">Tap </Radio.Button>
-                        <Radio.Button style={{ width: '155px' }} value="swipe">Swipe </Radio.Button>
+                        <Radio.Button style={{ width: '155px', marginTop: '5px', marginLeft: '5px' }} value="tap">Tap </Radio.Button>
+                        <Radio.Button style={{ width: '155px', marginTop: '5px' }} value="swipe">Swipe </Radio.Button>
                     </Radio.Group>
-                    <Button style={{ width: '150px', height: '30px', marginRight: '10px', float: 'right' }} onClick={this.handleTakeAppScreenshot.bind(this)}>
+                    <Button style={{ width: '150px', height: '30px', marginRight: '10px', marginTop: '5px', float: 'right' }} onClick={this.handleTakeAppScreenshot.bind(this)}>
                         Screenshot
                     </Button>
-                    <Button style={{ width: '150px', height: '30px', marginRight: '10px', float: 'right' }} onClick={this.handleWindowSize.bind(this)}>
+                    <Button style={{ width: '150px', height: '30px', marginRight: '10px', marginTop: '5px', float: 'right' }} onClick={this.handleWindowSize.bind(this)}>
                         Window Size
                     </Button>
                 </div>

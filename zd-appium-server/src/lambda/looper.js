@@ -32,8 +32,8 @@ class Looper {
 
     async execute({ userId, scriptId, script }) {
         this.isExecuting = true;
-        const client = new Runner(userId, scriptId);
-        await client.run(script);
+        const runner = new Runner(userId, scriptId);
+        await runner.run(script);
         this.isExecuting = false;
         this.dequeue();
         if (!this.isEmpty()) {

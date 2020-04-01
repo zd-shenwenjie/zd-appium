@@ -9,17 +9,24 @@ class Runner {
     }
 
     async run(script) {
+        const sandbox = {
+            ...zdapi,
+            console
+        }
+
         script = `
             async function run() {
                 setUserId('${this.userId}');
                 ${script}
             }
             
-            run().catch(e => {
-                console.log(e.message)
-            });
+            try {
+                run();
+            } catch (error) {
+                console.log(error.message);
+            }
         `;
-        await vm.runInNewContext(script, zdapi);
+        await vm.runInNewContext(script, sandbox);
     }
 }
 

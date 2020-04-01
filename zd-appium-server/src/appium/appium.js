@@ -234,11 +234,12 @@ function XML2JSON(source) {
         for (let i = 0; i < childNodes.length; i++) {
             const childNode = childNodes[i];
             if (childNode.nodeType == 1) {
-                eleObject[childNode.tagName] = {
-                    attributes: parseAttributes(childNode.attributes),
-                    children: parseChildNodes(childNode.childNodes),
-                    xpath: parseXPath(doc, childNode)
-                }
+                const tagName = childNode.tagName;
+                const attributes = parseAttributes(childNode.attributes);
+                const children = parseChildNodes(childNode.childNodes);
+                const xpath = parseXPath(doc, childNode);
+                const key = tagName + '_' + attributes['index'];
+                eleObject[key] = { attributes, children, xpath }
             }
         }
         return eleObject;
@@ -280,7 +281,7 @@ async function swipeByCoordinates(sessionId, from, to) {
 
 async function click(sessionId, { resource_id, content_desc, class_name, xpath, index = 0, isWaitFor = false }) {
     if (appiumHandler && checkSession(sessionId) && (resource_id || content_desc || class_name || xpath)) {
-        const element = null;
+        let element = null;
         if (resource_id) {
             element = isWaitFor ? await waitForElementById(resource_id) : await elementById(sessionId, resource_id);
         } else if (content_desc) {
@@ -309,7 +310,7 @@ async function click(sessionId, { resource_id, content_desc, class_name, xpath, 
 
 async function sendKeys(sessionId, { resource_id, content_desc, class_name, xpath, index = 0, isWaitFor = false }, keys) {
     if (appiumHandler && checkSession(sessionId) && (resource_id || content_desc || class_name || xpath) && keys) {
-        const element = null;
+        let element = null;
         if (resource_id) {
             element = isWaitFor ? await waitForElementById(resource_id) : await elementById(sessionId, resource_id);
         } else if (content_desc) {
@@ -340,7 +341,7 @@ async function sendKeys(sessionId, { resource_id, content_desc, class_name, xpat
 async function getText(sessionId, { resource_id, content_desc, class_name, xpath, index = 0, isWaitFor = false }) {
     let text = '';
     if (appiumHandler && checkSession(sessionId) && (resource_id || content_desc || class_name || xpath)) {
-        const element = null;
+        let element = null;
         if (resource_id) {
             element = isWaitFor ? await waitForElementById(resource_id) : await elementById(sessionId, resource_id);
         } else if (content_desc) {
@@ -387,7 +388,7 @@ async function elementsByAccessibilityId(sessionId, content_desc) {
     if (appiumHandler && checkSession(sessionId)) {
         elements = await appiumHandler.elementsByAccessibilityId(content_desc);
     }
-    return element;
+    return elements;
 }
 
 async function waitForElementsByAccessibilityId(sessionId, content_desc) {
