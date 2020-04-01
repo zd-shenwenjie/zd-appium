@@ -66,7 +66,7 @@ function connection() {
 connection();
 
 emitter.on('connection', async function (userId) {
-    zdapi.setUserId(userId);
+    setUserId(userId);
     const devices = await getDevices();
     console.log(devices);
     const pkgs = await getPackages();
@@ -93,7 +93,7 @@ emitter.on('connection', async function (userId) {
     await click({ xpath: '//androidx.appcompat.app.ActionBar.Tab[@content-desc="Sound"]/android.widget.TextView' });
     const text = await getText({ xpath: '//androidx.appcompat.app.ActionBar.Tab[@content-desc="Sound"]/android.widget.TextView', index: 0 })
     console.log('text->' + text);
-    await zdapi.killSession();
+    await killSession();
     appiumClient.close();
 });
 
