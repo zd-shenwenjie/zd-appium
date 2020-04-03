@@ -14,6 +14,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(router);
 
 const servers = controller.servers();
+
 if (servers) {
     servers.forEach(server => {
         const routerPath = `/api/${server.name}`;

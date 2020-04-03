@@ -1,6 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
-const { exec } = require('child_process');
+const { execSync } = require('child_process');
 
 function servers() {
     let servers = [];
@@ -10,7 +10,7 @@ function servers() {
             for (const server of config.servers) {
                 if (server.enabled) {
                     servers.push(server);
-                    startServer(server)
+                    startServer(server);
                 }
             }
         }
@@ -21,19 +21,14 @@ function servers() {
 }
 
 function startServer(server) {
-    const name = server.name;
-    const port = server.port;
-    const script = path.join(__dirname, name, 'index.js');
-    const process = exec(`node ${script} ${port}`, (err, stdout, stderr) => {
-        if (err) {
-            console.log(err.message);
-            return;
-        }
-        console.log(stdout, stderr)
-    });
-    process.stdout.on('data', (data) => {
-        console.log(data);
-    });
+    if (server && server.hasOwnProperty('name') && server.hasOwnProperty('port')) {
+        const name = server.name;
+        const port = server.port;
+        const script = path.join(__dirname, name, 'index.js');
+        const cmd = `pm2 start ${script} --name ${name} -- ${port}`;
+        const buf = execSync(`pm2 start ${script} --name ${name} -- ${port}`);
+        console.log(cmd, buf.toString());
+    }
 }
 
 module.exports = {

@@ -1,8 +1,7 @@
 import SocketClient from 'socket.io-client';
 import axios from 'axios';
 
-const SERVER_IP = '192.168.0.184';
-// const SERVER_IP ='192.168.2.238';
+const SERVER_IP = '192.168.3.82';
 
 const URL_APPIUM_SERVER = `http://${SERVER_IP}:7001`;
 const URL_LAMBDA_SERVER = `http://${SERVER_IP}:7002`;
